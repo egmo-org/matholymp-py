@@ -83,7 +83,7 @@ matholymp:
 * A web server such as Apache, and a database server (MySQL or
   PostgreSQL), are also recommended for use with the online
   registration system.  (For testing purposes, you can use Roundup's
-  built-in web server and its support for Python's :py:mod:`dbm`.)
+  built-in web server and its support for Python's :py:mod:`sqlite3`.)
 
 * To generate the formatted documentation, `Sphinx
   <https://www.sphinx-doc.org/>`_ is needed, version 1.7.0 or later.

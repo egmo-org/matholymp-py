@@ -212,7 +212,7 @@ class RoundupTestInstance:
         for f in subst_files:
             replace_text_in_file(f, 'example.org', 'example.invalid')
         replace_text_in_file(self.config_ini, '\nbackend = postgresql\n',
-                             '\nbackend = anydbm\n')
+                             '\nbackend = sqlite\n')
         replace_text_in_file(self.config_ini,
                              '\npassword_pbkdf2_default_rounds = 2000000\n',
                              '\npassword_pbkdf2_default_rounds = 1000\n')
