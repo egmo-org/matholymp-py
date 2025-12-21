@@ -1,6 +1,6 @@
 See docs/ for matholymp documentation in reStructuredText format,
 starting with intro.rst for information on prerequisites and how to
-generate formatted documentation.  Formatted documentation for the
-most recent release is also available online:
+generate formatted documentation.  Formatted documentation for a
+recent development version is also available online:
 
-https://www.polyomino.org.uk/mathematics/olympiad-software/
+https://egmo-org.github.io/matholymp-py/
