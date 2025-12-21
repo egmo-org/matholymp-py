@@ -134,6 +134,9 @@ Next version (unreleased)
   registration system has a new configuration variable
   ``matholymp_num_exams``.
 
+* The primary source for the software is now `on GitHub
+  <https://github.com/egmo-org/matholymp-py>`_.
+
 Version 2020.07.0 (22 July 2020)
 --------------------------------
 

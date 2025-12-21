@@ -157,13 +157,8 @@ Releases of matholymp are available for download:
   <https://www.polyomino.org.uk/mathematics/olympiad-software/matholymp-2014.09.0.tar.gz>`_,
   `GPG signature <https://www.polyomino.org.uk/mathematics/olympiad-software/matholymp-2014.09.0.tar.gz.sig>`_).
 
-The current development sources of matholymp are available using `Git
-<https://git-scm.com/>`_::
-
-   git clone https://git.ukmt.org.uk/matholymp-py.git
-
-There is also a `mirror on GitHub
-<https://github.com/jsm28/matholymp-py>`_.
+The current development sources of matholymp are available
+`from GitHub <https://github.com/egmo-org/matholymp-py>`_.
 
 The matholymp code can be used directly from its source directory; no
 installation is required.  If you run the provided scripts from the
