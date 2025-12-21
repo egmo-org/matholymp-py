@@ -120,7 +120,9 @@ have no recommendations regarding whether you should use packaged
 versions where available or build these prerequisites locally; that is
 a matter of personal preference.)
 
-Releases of matholymp are available for download:
+Releases of matholymp are available for download, but use of a recent
+development version is recommended instead of a possibly much older
+release:
 
 * 2020.07.0 (`sources
   <https://www.polyomino.org.uk/mathematics/olympiad-software/matholymp-2020.07.0.tar.gz>`_,
