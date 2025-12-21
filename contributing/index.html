@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Contributing to matholymp &#8212; matholymp 2025.12.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=4e8c6c69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Release notes" href="../release-notes/" />
+    <link rel="prev" title="Document generation" href="../document-generation/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="contributing-to-matholymp">
+<span id="contributing"></span><h1>Contributing to matholymp<a class="headerlink" href="#contributing-to-matholymp" title="Link to this heading">¶</a></h1>
+<p>Although matholymp is intended to be configurable for the most common
+requirements of mathematical olympiads, it is likely you will find
+some features missing that would be useful for your event; I have a
+long list of possible future enhancements (and welcome suggestions for
+such features if you don’t plan to implement them yourself); see
+<a class="reference internal" href="../todo/#todo"><span class="std std-ref">Matholymp todo list</span></a>.  If you do implement new features for matholymp, please
+try to contribute them back to me (even if only useful for some
+events, it is likely your own event is not the only one that could use
+a particular feature).</p>
+<p>If you wish to contribute changes to matholymp, you should be working
+with the current Git version.  You can then send me diffs generated
+with <strong class="command">git diff</strong> or <strong class="command">git format-patch</strong>, either using
+<strong class="command">git send-email</strong> or with your normal email client (if sending
+with your normal email client, patches should be attached, unless you
+are sure your email client does not change whitespace, including UTF-8
+BOMs, when including something inline).  You can also send Git pull
+requests if you prefer.</p>
+<p>Please keep patches following the existing coding style (which
+generally tries to follow <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0008/"><strong>PEP 8</strong></a>).  The code is designed so that
+configuration for a particular event can be done in configuration
+files and HTML and LaTeX templates, so if a feature is only
+appropriate for some events please ensure it is appropriately
+configurable rather than always enabled.  If the new features affect
+parts of the code covered by the automated testsuite (which can be run
+with <strong class="command">mo-run-tests</strong>), please update existing test
+expectations if needed, and add new tests if not adequately covered by
+the existing tests.</p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">matholymp</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro/">Introduction, prerequisites and downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roundup-patches/">Roundup patches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../static-site/">Static site generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../online-registration/">Online registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../document-generation/">Document generation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing to matholymp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-notes/">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copying/">Copyright and license</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thanks/">Thanks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo/">Matholymp todo list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../document-generation/" title="previous chapter">Document generation</a></li>
+      <li>Next: <a href="../release-notes/" title="next chapter">Release notes</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014-2025, Joseph Samuel Myers.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/contributing.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

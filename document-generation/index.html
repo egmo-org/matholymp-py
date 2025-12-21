@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Document generation &#8212; matholymp 2025.12.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=4e8c6c69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Contributing to matholymp" href="../contributing/" />
+    <link rel="prev" title="Online registration" href="../online-registration/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="document-generation">
+<span id="id1"></span><h1>Document generation<a class="headerlink" href="#document-generation" title="Link to this heading">¶</a></h1>
+<p>Matholymp provides a script <strong class="command">mo-document-generate</strong> to
+generate a range of documents, such as name badges and exam papers in
+the right languages with each contestant’s contestant code printed on
+them, from registration system data.</p>
+<p><strong class="command">mo-document-generate</strong> expects to be run from a directory
+containing:</p>
+<ul class="simple">
+<li><p>A file <code class="file docutils literal notranslate"><span class="pre">documentgen.cfg</span></code> configuring the document generation
+(parts of this file can stay the same from year to year, but parts
+will need updating for each year’s event).</p></li>
+<li><p>A subdirectory <code class="file docutils literal notranslate"><span class="pre">templates/</span></code> with various LaTeX templates for
+documents and PDF backgrounds and logos.  These are built with
+<strong class="command">pdflatex</strong>, unless they contain the string <code class="docutils literal notranslate"><span class="pre">xelatex</span></code> in
+which case they are built with <strong class="command">xelatex</strong> instead.</p></li>
+<li><p>A subdirectory <code class="file docutils literal notranslate"><span class="pre">papers/</span><em><span class="pre">year</span></em><span class="pre">/</span></code> containing LaTeX sources or
+PDFs of exam papers (from leaders, before headings and backgrounds
+are added by the script).</p></li>
+<li><p>A subdirectory <code class="file docutils literal notranslate"><span class="pre">data/</span></code> containing data from the registration
+system: <code class="file docutils literal notranslate"><span class="pre">countries.csv</span></code>, <code class="file docutils literal notranslate"><span class="pre">people.csv</span></code> (the full CSV file
+of people, downloaded while logged in administratively) and
+subdirectories <code class="file docutils literal notranslate"><span class="pre">flags/</span></code> and <code class="file docutils literal notranslate"><span class="pre">photos/</span></code> unpacked from the
+ZIP files downloaded from the registration system.</p></li>
+<li><p>A subdirectory <code class="file docutils literal notranslate"><span class="pre">out/</span></code> (which may initially be empty), where
+output files are placed by the script.</p></li>
+</ul>
+<section id="example-files">
+<h2>Example files<a class="headerlink" href="#example-files" title="Link to this heading">¶</a></h2>
+<p>The <code class="file docutils literal notranslate"><span class="pre">examples/document-generation/</span></code> directory in the matholymp
+source distribution includes versions of <a class="reference download internal" download="" href="../_downloads/3d57da8a20d396320d71a01dfcf1c654/documentgen.cfg"><code class="xref download docutils literal notranslate"><span class="pre">documentgen.cfg</span></code></a> and LaTeX templates
+that may be used as a basis for configuring document generation.  It
+also includes an example exam paper <a class="reference download internal" download="" href="../_downloads/c5e83d67529faf40bb34845293285273/English-day1.tex"><code class="xref download docutils literal notranslate"><span class="pre">English-day1.tex</span></code></a> that sets suitable
+page margins that are compatible with how the included LaTeX templates
+position various headings on the page.</p>
+</section>
+<section id="graphic-design">
+<h2>Graphic design<a class="headerlink" href="#graphic-design" title="Link to this heading">¶</a></h2>
+<p>The LaTeX templates provided are those used for EGMO.  In various
+places they conditionally include PDF files with backgrounds or logos
+that are not included; you will need to provide such files for your
+event if generating affected documents.  It is likely that you will
+need to adapt these templates to fix the layout of the backgrounds you
+provide, unless those are laid out exactly the same as those used for
+EGMO.  (If nothing else, the clipping when the logo is included is
+unlikely to be correct for another event.)</p>
+</section>
+<section id="document-generation-tasks">
+<h2>Document generation tasks<a class="headerlink" href="#document-generation-tasks" title="Link to this heading">¶</a></h2>
+<p>The following describes how to generate various documents with
+<strong class="command">mo-document-generate</strong>.  In all cases, the commands should be
+run from the directory with contents detailed above.  Although the
+examples generally describe how to generate a full set of documents,
+you can also generally generate documents relating to individual
+people, by giving that person’s number (in the registration system) or
+contestant code in place of <code class="docutils literal notranslate"><span class="pre">all</span></code>.</p>
+<section id="name-badges">
+<h3>Name badges<a class="headerlink" href="#name-badges" title="Link to this heading">¶</a></h3>
+<p>To generate all name badges (for participants who are, or might be,
+attending in person):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="o">--</span><span class="n">background</span> <span class="n">badge</span> <span class="nb">all</span>
+</pre></div>
+</div>
+<p>Omit <code class="docutils literal notranslate"><span class="pre">--background</span></code> if each badge is to be printed onto card with
+the appropriate background pre-printed, instead of including the
+backgrounds in the PDFs generated by <strong class="command">mo-document-generate</strong>.</p>
+<p>To generate name badges using photos that have been provided for
+producing name badges, where the person concerned does not wish them
+to be public on the registration site but the registration system
+support for specifying permissions for particular uses of photos has
+not been enabled, you need to copy the relevant photos into new
+subdirectories of <code class="file docutils literal notranslate"><span class="pre">data/photos/</span></code> not corresponding to any photo
+from the registration system and edit <code class="file docutils literal notranslate"><span class="pre">people.csv</span></code> to enter
+values in the Photo URL column that cause those photos to be selected.</p>
+</section>
+<section id="invitation-letters">
+<h3>Invitation letters<a class="headerlink" href="#invitation-letters" title="Link to this heading">¶</a></h3>
+<p>To generate an invitation letter for a given person:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">invitation</span><span class="o">-</span><span class="n">letter</span> <span class="o">*</span><span class="n">number</span><span class="o">*</span>
+</pre></div>
+</div>
+<p>To generate invitation letters for all participants (who are, or might
+be, attending in person):</p>
+<blockquote>
+<div><p>mo-document-generate invitation-letter all</p>
+</div></blockquote>
+</section>
+<section id="desk-labels">
+<h3>Desk labels<a class="headerlink" href="#desk-labels" title="Link to this heading">¶</a></h3>
+<p>To generate labels for contestant desks for the exams (the example
+template expects to put these on 127mm by 76mm cards, but of course
+you can change the template to print them in some other way):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">desk</span><span class="o">-</span><span class="n">label</span> <span class="nb">all</span>
+</pre></div>
+</div>
+<p>This prints labels in a default order (all Contestants 1, then all
+Contestants 2, and so on).  The <code class="samp docutils literal notranslate"><span class="pre">--exam-order</span> <em><span class="pre">file</span></em></code> option may
+be used to specify a text file listing contestant codes if a different
+order is required.  Labels are only generated for contestants who are,
+or might be, attending in person.</p>
+</section>
+<section id="checklist-of-languages">
+<h3>Checklist of languages<a class="headerlink" href="#checklist-of-languages" title="Link to this heading">¶</a></h3>
+<p>To generate a checklist <code class="file docutils literal notranslate"><span class="pre">language-list.txt</span></code> of which contestants
+have requested papers in which languages, and a checklist
+<code class="file docutils literal notranslate"><span class="pre">language-status.txt</span></code> of which languages have papers available:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">language</span><span class="o">-</span><span class="nb">list</span> <span class="nb">all</span>
+</pre></div>
+</div>
+</section>
+<section id="exam-papers">
+<h3>Exam papers<a class="headerlink" href="#exam-papers" title="Link to this heading">¶</a></h3>
+<p>Give the English papers to leaders in LaTeX form with appropriate page
+margins.  Collect translations and put them in the
+<code class="file docutils literal notranslate"><span class="pre">papers/</span><em><span class="pre">year</span></em><span class="pre">/</span></code> directory, with PDFs having names such as
+<code class="file docutils literal notranslate"><span class="pre">English-day1.pdf</span></code> (or just <code class="file docutils literal notranslate"><span class="pre">English.pdf</span></code> for a single-day
+competition); in the filename, all characters that are not ASCII
+letters are omitted from the language name (so a paper for “French
+(Swiss)” would be <code class="file docutils literal notranslate"><span class="pre">FrenchSwiss-day1.pdf</span></code>, for example).  If the
+paper is produced using LaTeX, only the file with a name such as
+<code class="file docutils literal notranslate"><span class="pre">English-day1.tex</span></code> needs to go in that directory;
+<strong class="command">mo-document-generate</strong> will run <strong class="command">pdflatex</strong> on such a
+file automatically (the generated PDF will go in the <code class="file docutils literal notranslate"><span class="pre">out/</span></code>
+directory, and be updated automatically if the LaTeX source changes).
+If both the PDF and LaTeX source are present, only the PDF will be
+used, so watch out for a PDF being out of date with respect to the
+LaTeX file.  If a leader wishes to use Word, make sure that the page
+margins are correct and again get a matching PDF file.  Given the
+appropriately-named LaTeX sources or PDFs of papers from leaders,
+there are then several documents that can be generated.</p>
+<p>For draft papers to display:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">paper</span> <span class="n">new</span><span class="o">-</span><span class="n">drafts</span>
+</pre></div>
+</div>
+<p>That will generate draft papers for all translations that are new or
+modified since the previous run (if any) of that command.  To generate
+drafts instead for a specific language (add <code class="samp docutils literal notranslate"><span class="pre">--day</span> <em><span class="pre">day</span></em></code> to
+generate these only for a particular day; the language name is as used
+in filenames):</p>
+<pre class="literal-block">mo-document-generate paper <em>language</em></pre>
+<p>For final papers for exams (this will generate a PDF of each day’s
+papers, that includes papers for each contestant in the right
+languages marked with their contestant code, as well as such PDFs of
+papers for leaders in all the languages requested by their students;
+omit the <code class="samp docutils literal notranslate"><span class="pre">--day</span> <em><span class="pre">day</span></em></code> option if there is only one day at the
+competition):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="o">--</span><span class="n">day</span> <span class="mi">1</span> <span class="n">paper</span> <span class="nb">all</span>
+<span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="o">--</span><span class="n">day</span> <span class="mi">2</span> <span class="n">paper</span> <span class="nb">all</span>
+</pre></div>
+</div>
+<p>This prints papers in a default order (all Contestants 1, then all
+Contestants 2, and so on).  The <code class="samp docutils literal notranslate"><span class="pre">--exam-order</span> <em><span class="pre">file</span></em></code> option may
+be used to specify a text file listing contestant codes if a different
+order is required.  To generate papers for individual contestants in
+separate files, a contestant code may be used in place of <code class="samp docutils literal notranslate"><span class="pre">all</span></code>;
+use <code class="samp docutils literal notranslate"><span class="pre">all-split</span></code> to generate papers for all contestants in
+separate files, or <code class="samp docutils literal notranslate"><span class="pre">all-split-remote</span></code> to do so only for
+contestants who are, or may be, remote participants at a hybrid
+event.  To generate a single file for a day’s papers, but only for
+participants who are, or may be, participating in person at a hybrid
+event, use <code class="samp docutils literal notranslate"><span class="pre">all-in-person</span></code>.</p>
+<p>For final papers for the website (if papers are being printed with
+pre-printed backgrounds, use both commands, otherwise just the first
+command; these commands generate the files to be imported to the
+website with <strong class="command">mo-static-papers-import</strong>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">paper</span> <span class="nb">all</span><span class="o">-</span><span class="n">languages</span>
+<span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="o">--</span><span class="n">background</span> <span class="n">paper</span> <span class="nb">all</span><span class="o">-</span><span class="n">languages</span>
+</pre></div>
+</div>
+</section>
+<section id="handling-handwritten-papers">
+<h3>Handling handwritten papers<a class="headerlink" href="#handling-handwritten-papers" title="Link to this heading">¶</a></h3>
+<p>If a leader handwrites their translation, scan the paper (black and
+white with appropriate threshold), crop the scan and make it
+transparent.  Then you can create a LaTeX file for the document to
+include the scan; the main part should look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">begin</span><span class="p">{</span><span class="n">document</span><span class="p">}</span>
+\<span class="n">begin</span><span class="p">{</span><span class="n">center</span><span class="p">}</span>
+\<span class="n">includegraphics</span><span class="p">[</span><span class="n">width</span><span class="o">=</span><span class="mi">16</span><span class="n">cm</span><span class="p">,</span><span class="n">height</span><span class="o">=</span><span class="mi">20</span><span class="n">cm</span><span class="p">,</span><span class="n">keepaspectratio</span><span class="p">]{</span><span class="n">Language</span><span class="o">-</span><span class="n">dayN</span><span class="o">-</span><span class="n">scan</span><span class="o">.</span><span class="n">png</span><span class="p">}</span>
+\<span class="n">end</span><span class="p">{</span><span class="n">center</span><span class="p">}</span>
+\<span class="n">end</span><span class="p">{</span><span class="n">document</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The following steps may be helpful for the process of making a scan
+transparent in GIMP:</p>
+<ul class="simple">
+<li><p><span class="menuselection">Layer ‣ Transparency ‣ Add Alpha Channel</span>.</p></li>
+<li><p><span class="menuselection">Select ‣ By Colour</span>.</p></li>
+<li><p>Click on the colour you want to become transparent (i.e., white).
+The selection is highlighted with some dashed lines.</p></li>
+<li><p><span class="menuselection">Edit ‣ Clear</span>.</p></li>
+<li><p>Save the file as PNG.</p></li>
+</ul>
+</section>
+<section id="coordination-forms">
+<h3>Coordination forms<a class="headerlink" href="#coordination-forms" title="Link to this heading">¶</a></h3>
+<p>To generate coordination forms (the example template will need
+adapting if you have more than four contestants per team):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">coord</span><span class="o">-</span><span class="n">form</span> <span class="nb">all</span>
+</pre></div>
+</div>
+<p>Add <code class="docutils literal notranslate"><span class="pre">--background</span></code> if a background design is to be used in the
+forms, but they are not printed on paper with that design pre-printed.</p>
+</section>
+<section id="certificates">
+<h3>Certificates<a class="headerlink" href="#certificates" title="Link to this heading">¶</a></h3>
+<p>If generating certificates for awards, <code class="file docutils literal notranslate"><span class="pre">people.csv</span></code> needs to
+have been downloaded after the final results and medal boundaries were
+entered, and the medal boundaries must also have been entered in
+<code class="file docutils literal notranslate"><span class="pre">documentgen.cfg</span></code>.  Then do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">participation</span><span class="o">-</span><span class="n">certificate</span> <span class="nb">all</span>
+<span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">award</span><span class="o">-</span><span class="n">certificate</span> <span class="n">gold</span>
+<span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">award</span><span class="o">-</span><span class="n">certificate</span> <span class="n">silver</span>
+<span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">award</span><span class="o">-</span><span class="n">certificate</span> <span class="n">bronze</span>
+<span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">award</span><span class="o">-</span><span class="n">certificate</span> <span class="n">hm</span>
+</pre></div>
+</div>
+<p>Add <code class="docutils literal notranslate"><span class="pre">--background</span></code> if the certificates are to be printed complete
+with background, instead of just printing names, roles and countries
+on pre-printed certificates.</p>
+</section>
+<section id="bulk-upload-of-scores">
+<h3>Bulk upload of scores<a class="headerlink" href="#bulk-upload-of-scores" title="Link to this heading">¶</a></h3>
+<p>If the network access at the olympiad site is so poor as to cause
+problems for entering scores online during the competition, it may be
+necessary to enter scores in a spreadsheet offline and then upload
+them to the registration system in bulk.  In that case, create a CSV
+file (with BOM) in <code class="file docutils literal notranslate"><span class="pre">data/scores-in.csv</span></code>, with columns
+“Contestant Code” and “Pn” for each problem.  Then do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">scores</span><span class="o">-</span><span class="n">commands</span> <span class="nb">all</span>
+</pre></div>
+</div>
+<p>This generates a Unix shell script <code class="file docutils literal notranslate"><span class="pre">upload-scores</span></code> to use
+<strong class="command">roundup-admin</strong> to upload the scores.  On the system running
+the registration system, as the user running that system, then do:</p>
+<pre class="literal-block">sh upload-scores <em>path-to-roundup-admin</em> <em>path-to-instance</em></pre>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">matholymp</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro/">Introduction, prerequisites and downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roundup-patches/">Roundup patches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../static-site/">Static site generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../online-registration/">Online registration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Document generation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-files">Example files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#graphic-design">Graphic design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#document-generation-tasks">Document generation tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/">Contributing to matholymp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-notes/">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copying/">Copyright and license</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thanks/">Thanks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo/">Matholymp todo list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../online-registration/" title="previous chapter">Online registration</a></li>
+      <li>Next: <a href="../contributing/" title="next chapter">Contributing to matholymp</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014-2025, Joseph Samuel Myers.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/document-generation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

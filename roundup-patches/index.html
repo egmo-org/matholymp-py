@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Roundup patches &#8212; matholymp 2025.12.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=4e8c6c69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Static site generation" href="../static-site/" />
+    <link rel="prev" title="Introduction, prerequisites and downloads" href="../intro/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="roundup-patches">
+<span id="id1"></span><h1>Roundup patches<a class="headerlink" href="#roundup-patches" title="Link to this heading">¶</a></h1>
+<p>Matholymp comes with some patches to <a class="reference external" href="http://roundup-tracker.org/">Roundup</a> that have been found useful when using
+the matholymp’s online registration functionality based on Roundup.
+It may be useful to apply these patches to the Roundup sources before
+installing Roundup.  All these patches can be applied with
+<strong class="command">patch -p1 -N -E</strong> from within the Roundup source directory.</p>
+<p>These are located in the <code class="file docutils literal notranslate"><span class="pre">roundup-patches/</span></code> directory of the
+source distribution, and are relative to Roundup version 2.5.0 (so may
+require changes to apply cleanly to later versions).  Details of the
+individual patches are:</p>
+<ul class="simple">
+<li><p><a class="reference download internal" download="" href="../_downloads/a50745286a01ca59cd95b4a6c3f311b4/issue2550750-no-timeout-mail.patch"><code class="xref download docutils literal notranslate"><span class="pre">issue2550750-no-timeout-mail.patch</span></code></a> is a patch
+for <a class="reference external" href="https://issues.roundup-tracker.org/issue2550750">Roundup issue 2550750</a> that avoids
+socket timeouts (when large images are served through Roundup, for
+example) generating emails to the person running the registration
+system.</p></li>
+<li><p><a class="reference download internal" download="" href="../_downloads/d7d671bad21728122a985d81085e7104/increase-socket-timeout.patch"><code class="xref download docutils literal notranslate"><span class="pre">increase-socket-timeout.patch</span></code></a> is a patch that
+increases the socket timeout to reduce the number of such timeouts
+(there may however not be a great need for this when the previous
+patch is applied).</p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">matholymp</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro/">Introduction, prerequisites and downloads</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Roundup patches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../static-site/">Static site generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../online-registration/">Online registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../document-generation/">Document generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/">Contributing to matholymp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-notes/">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copying/">Copyright and license</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thanks/">Thanks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo/">Matholymp todo list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../intro/" title="previous chapter">Introduction, prerequisites and downloads</a></li>
+      <li>Next: <a href="../static-site/" title="next chapter">Static site generation</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014-2025, Joseph Samuel Myers.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/roundup-patches.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

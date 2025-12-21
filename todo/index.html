@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Matholymp todo list &#8212; matholymp 2025.12.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=4e8c6c69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="prev" title="Thanks" href="../thanks/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="matholymp-todo-list">
+<span id="todo"></span><h1>Matholymp todo list<a class="headerlink" href="#matholymp-todo-list" title="Link to this heading">¶</a></h1>
+<p>The following lists ideas for possible changes and improvements to
+matholymp, both internal and user-visible.  Many of these ideas are
+speculative, I may have further ideas not written here about how a
+change should be implemented and I may not always be sure that a
+change would be desirable, so it would be a good idea to discuss
+possible changes with me first before implementing ideas listed here.
+If you are reading the version of this list in the online
+documentation for a release, you should also check the current Git
+version for any changes to the list.  See also <a class="reference internal" href="../contributing/#contributing"><span class="std std-ref">Contributing to matholymp</span></a>.</p>
+<p>Changes are likely to be a higher priority if they are known to be of
+use for a specific event that is using or planning to use matholymp.
+Some entries in this list reflect known areas of variation between
+different events (so would be necessary or useful if events with that
+form of variation from what matholymp currently does were to choose to
+adopt it).</p>
+<section id="general-and-global-changes">
+<h2>General and global changes<a class="headerlink" href="#general-and-global-changes" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Support coordination timetabling (displaying a timetable showing
+active and pending coordinations; also generating a timetable if
+desired).</p></li>
+<li><p>Implement better sorting of roles / contestant codes (numerical
+rather than simply alphabetic) if 10 or more contestants.  (Applies
+to registration system sorting as well as to main
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">matholymp.data</span></code> sorting.)</p></li>
+<li><p>Handle restricted subsets of possible scores on a problem, where the
+rules of a competition do not allow all scores from 0 to the
+maximum.</p></li>
+<li><p>Support awards not algorithmically derived from scores and
+annotations relating to awards.</p></li>
+<li><p>Support disqualifications (explicitly showing that there was one
+rather than just removing people and countries).</p></li>
+<li><p>Support name orders other than given-family.</p></li>
+<li><p>Support mononymous people.</p></li>
+<li><p>Support multilingual output support rather than just English.</p></li>
+<li><p>Avoid Y10K problems (throughout, allow more-than-4-digit years).</p></li>
+<li><p>Make all static site and registration system text generated from
+Python code rather than templates more customisable.</p></li>
+<li><p>Add graphical statistics of results and individual and country
+performance over time.</p></li>
+<li><p>Support distinguishing official and unofficial countries and
+contestants in tables by using different CSS styles.</p></li>
+<li><p>Support gender as optionally public information (generally or for
+contestants).</p></li>
+<li><p>Allow SVG images of flags and generate PNG automatically for LaTeX
+inclusion.</p></li>
+<li><p>Allow for a global configuration file rather than separate files for
+each part of the system; also allow scripts to read multiple
+configuration files (shared and non-shared).</p></li>
+<li><p>Add web interfaces for more things currently done on command line.</p></li>
+<li><p>Don’t hardcode <code class="docutils literal notranslate"><span class="pre">en_GB</span></code> as locale for collation.</p></li>
+<li><p>Include Python API documentation in generated documentation.</p></li>
+<li><p>Add automated testing for error cases in scripts.</p></li>
+<li><p>Consistently pass ids to <code class="xref py py-func docutils literal notranslate"><span class="pre">file_url_to_local()</span></code> as integers,
+not sometimes integers (document generation) and sometimes strings
+(<strong class="command">mo-static-import</strong>).</p></li>
+<li><p>Make capitalization of exception messages consistent.</p></li>
+<li><p>Take advantage of missing CSV entries being output as <code class="docutils literal notranslate"><span class="pre">''</span></code> by
+Python by default to simplify code.</p></li>
+<li><p>Use more specific exception classes rather than <code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code>
+etc. everywhere.</p></li>
+<li><p>Review code style against the current version of <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0008/"><strong>PEP 8</strong></a> and fix or
+update style accordingly.</p></li>
+</ul>
+</section>
+<section id="static-site">
+<h2>Static site<a class="headerlink" href="#static-site" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Allow CSV files to specify event short and long names, and the
+number of contestants for ranking, so those can vary from year to
+year.</p></li>
+<li><p>Support not showing the host country / city if always the same.</p></li>
+<li><p>Support (in matholymp rather than through hardcoding redirects in
+web server configuration) merging people; removing people (if later
+determined not to have been there, etc.); incomplete scores or names
+information for old events.  E.g., add a <code class="docutils literal notranslate"><span class="pre">Redirect</span> <span class="pre">Person</span> <span class="pre">Numbers</span></code>
+column in <code class="file docutils literal notranslate"><span class="pre">people.csv</span></code> plus allowing <code class="docutils literal notranslate"><span class="pre">Annual</span> <span class="pre">URL</span></code> to be a
+comma-separated list, together with <strong class="command">mo-static-upgrade</strong>
+support, tests and documentation.</p></li>
+<li><p>Add a general index of all problem papers for all years.</p></li>
+<li><p>Support a host country that did not previously take part (e.g., when
+a planned host splits up, or for a completely new event), and
+generally ensure the site looks sensible when there are no past
+events.</p></li>
+<li><p>Make <strong class="command">mo-static-generate</strong> support running a command to
+postprocess its output, or commands to postprocess and push to
+production.</p></li>
+<li><p>Make <strong class="command">mo-static-import</strong> ignore excess data (e.g., from
+having the full version of <code class="file docutils literal notranslate"><span class="pre">people.csv</span></code> instead of the public
+version) rather than giving errors for it.</p></li>
+<li><p>Make <strong class="command">mo-static-import</strong> support downloading all data itself
+(including medal boundaries, via the medal_boundaries_csv action),
+and setting medal boundaries, so just running
+<strong class="command">mo-static-import</strong> with no arguments does everything needed
+after an event to transfer data to the static site.  At present, it
+can download most data, but not medal boundaries, and requires a
+directory to be specified explicitly.</p></li>
+<li><p>Make <strong class="command">mo-static-import</strong> and
+<strong class="command">mo-static-papers-import</strong> support automatically running
+<strong class="command">mo-static-generate</strong> (possibly with postprocessing
+commands).</p></li>
+</ul>
+</section>
+<section id="registration-system">
+<h2>Registration system<a class="headerlink" href="#registration-system" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Support bulk emails (announcements) to registration contacts.</p></li>
+<li><p>Extend automatic checks / warnings for all-uppercase names: also
+warn on the registration status page.</p></li>
+<li><p>Possibly make <code class="file docutils literal notranslate"><span class="pre">person.item.html</span></code> advise people of the
+recommended maximum file size for photos (in human-friendly form
+rather than a raw number of bytes).  File extension and contents
+should also be checked to agree with MIME type.  Apply checks also
+to flags and photos reused from previous years, but quietly don’t
+reuse in that case if format and extension mismatch.</p></li>
+<li><p>Add more automation for rotating photos server-side.</p></li>
+<li><p>Restrict access to retired photos and flags, similar to the
+restrictions on access to retired person and country records.  (This
+is a corner case, since access is already restricted to the photos
+and flags for retired person and country records, and to the
+non-current photos and flags for all person and country records.)</p></li>
+<li><p>Add user interface for removing a language, replacing all requests
+for it by requests for a given other language.</p></li>
+<li><p>In the registration system, show more past participation information
+rather than just a link.</p></li>
+<li><p>Generate automatic suggestions of possible past participation links
+where same name and same country or staff.</p></li>
+<li><p>Support for registration contact to view room allocations for their
+country and people sharing rooms with them.</p></li>
+<li><p>Support for automatic room allocation based on information about the
+capacities of available rooms and which rooms should have people in
+which roles.</p></li>
+<li><p>Support upload of sound files with pronunciation of participant
+names.</p></li>
+<li><p>Support other registration information where useful.</p></li>
+<li><p>Use database to describe maximum / expected number of people in a
+given role from a country rather than hardcoding.</p></li>
+<li><p>Use database to describe other role properties rather than
+hardcoding based on names (also applies to some other things,
+e.g., document generation).  This includes at least contestant
+number, whether should have phone number.  (Need to pass some
+information through to CSV files so registration status generation
+can work from those.)</p></li>
+<li><p>Allow other options for which roles are (initially) expected to have
+phone numbers instead of just participants guiding countries; this
+also affects the explanatory text about missing phone numbers.
+(More complicated if allowed for non-staff participants as well as
+staff.)</p></li>
+<li><p>Support for sending emails to registration contacts with reminders
+about missing data, and summaries of present data.</p></li>
+<li><p>Support bulk upload of registration details for people.</p></li>
+<li><p>Support self-registration accounts (that can register a single
+person in a particular role only, for both staff and normal
+countries, so people can enter some of their own data).</p></li>
+<li><p>Ensure all tables in the registration system use <code class="docutils literal notranslate"><span class="pre">thead</span></code> and
+<code class="docutils literal notranslate"><span class="pre">tbody</span></code> to facilitate uses involving sortable tables.</p></li>
+<li><p>Support for not publishing scores until the results are final, or
+for hiding some scores until all are entered or until the results
+are final, for events wanting such restrictions.</p></li>
+<li><p>Add more registration system sanity checks against mistakes by
+administrative users (open-ended issue).</p></li>
+<li><p>Support multiple new people being the same person on the static site
+(e.g., same new person as deputy for multiple countries, such as
+host country main and B teams).</p></li>
+<li><p>Move more registration system code out of
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">matholymp.roundupreg</span></code> rather than depending on Roundup
+interfaces (facilitates code sharing between multiple registration
+back ends).  At least, most of the logic for scaling down photos and
+maybe most of the caching code.</p></li>
+<li><p>Support automatic suggestions of possible medal boundaries, with
+information provided about how close those boundaries are to ideal
+on various metrics.</p></li>
+<li><p>Add more automated testing for registration system code.</p></li>
+</ul>
+<p>The following ideas are more speculative.</p>
+<ul class="simple">
+<li><p>Reduce the differences between static site and registration system
+CSV files (generally, include more data in registration system
+files, at least once results complete).</p></li>
+<li><p>Add more sanity checks for past participation information (not
+allowing multiple countries pointing to same past country, or
+pointing to past staff countries).</p></li>
+<li><p>Support Unicode sorting of names in the registration system in more
+cases.  The main ones are done, but this theoretically applies to
+lists of members of many classes that don’t go through matholymp
+code.  Also e.g. “plain” versions of <code class="docutils literal notranslate"><span class="pre">other_roles</span></code> and
+<code class="docutils literal notranslate"><span class="pre">guide_for</span></code> may not have the desired sorting.</p></li>
+<li><p>Add RSS feeds of new registered participants and changes to public
+participant details (old versions of changed data maybe shouldn’t be
+public, but could still indicate that something has changed or is
+new).</p></li>
+<li><p>Make registration system code avoid time-of-check / time-of-use race
+conditions (registering multiple people with the same role from the
+same country at the same time; creating / editing countries to
+duplicate country codes at the same time; entering scores for
+multiple problems for the same country at the same time; conceivably
+others).</p></li>
+<li><p>Support retiring special countries, as long as this doesn’t affect
+the special “anonymous” or “admin” users.</p></li>
+<li><p>Support logical role ordering within countries rather than only
+alphabetical.</p></li>
+<li><p>Add a public list of country contacts.  Or a private list for future
+hosts, or both with support for different contacts on the two lists.
+Add support for editing contacts that affects future years as well.
+(More generally, add automation for keeping user account passwords
+from year to year.)</p></li>
+<li><p>Allow people to enter just time for arrival / departure if on the
+standard dates.</p></li>
+<li><p>Support entering ranges for scores during coordination, so that
+medal boundaries can be considered based on such partial
+information.</p></li>
+</ul>
+</section>
+<section id="document-generation">
+<h2>Document generation<a class="headerlink" href="#document-generation" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Don’t hardcode English as a language to give to all leaders.</p></li>
+<li><p>Make draft papers say somewhere which draft version they are.</p></li>
+<li><p>Add more thorough testing for <strong class="command">mo-document-generate</strong>
+(background and logo PDFs, flags, photos, inclusion of room / phone
+numbers on badges, actual contents of LaTeX files, escaping of names
+and accented characters in documents).</p></li>
+<li><p>Add borders round flags on name badges (and website?).</p></li>
+<li><p>Allow labels for contestant desks to show more than two languages.</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">matholymp</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro/">Introduction, prerequisites and downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roundup-patches/">Roundup patches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../static-site/">Static site generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../online-registration/">Online registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../document-generation/">Document generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/">Contributing to matholymp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-notes/">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copying/">Copyright and license</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thanks/">Thanks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Matholymp todo list</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#general-and-global-changes">General and global changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#static-site">Static site</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#registration-system">Registration system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#document-generation">Document generation</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../thanks/" title="previous chapter">Thanks</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014-2025, Joseph Samuel Myers.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/todo.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

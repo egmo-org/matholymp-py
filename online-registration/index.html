@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Online registration &#8212; matholymp 2025.12.0.dev0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=4e8c6c69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Document generation" href="../document-generation/" />
+    <link rel="prev" title="Static site generation" href="../static-site/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="online-registration">
+<span id="id1"></span><h1>Online registration<a class="headerlink" href="#online-registration" title="Link to this heading">¶</a></h1>
+<p>Matholymp provides support for an online registration system based on
+Roundup.  See the <a class="reference external" href="http://roundup-tracker.org/docs/installation.html">Roundup installation documentation</a> for general
+information about how to install Roundup (including other Python
+packages you may need to install for the database back ends), while
+noting that there are some patches (see <a class="reference internal" href="../roundup-patches/#roundup-patches"><span class="std std-ref">Roundup patches</span></a>) it may
+be useful to apply before installing Roundup, and that the email
+interface is not used.</p>
+<p>The online registration system makes limited details of registered
+participants public online immediately, and a full online scoreboard
+during coordination.  Full details (both public and non-public) of
+registered participants can be downloaded when logged in to an
+administrative account.</p>
+<section id="example-files">
+<h2>Example files<a class="headerlink" href="#example-files" title="Link to this heading">¶</a></h2>
+<p>Various example files are provided in the
+<code class="file docutils literal notranslate"><span class="pre">examples/online-registration/</span></code> directory in the matholymp
+source distribution.  It is recommended that you copy that directory
+to form your Roundup instance directory (the “tracker home”), and then
+adapt the files as needed for your event.  Do not use
+<strong class="command">roundup-admin install</strong>, since none of the default templates
+it can install are being used.</p>
+<p>Having copied the examples, you then need to customise the following
+files:</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">config.ini</span></code> (the comments at the top indicate the settings
+that are most likely to need changing; note in particular the need
+to use <strong class="command">roundup-admin updateconfig</strong> in order to set the
+<code class="docutils literal notranslate"><span class="pre">secret_key</span></code> value, followed by merging those comments back into
+the file).</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">extensions/config.ini</span></code> (see the comments in the file for
+details of the individual settings; note that some of these settings
+will need updating for each year’s event).</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">extensions/email-template-new-user</span></code> (a template for emails
+sent automatically to country contacts with details of their
+accounts for registering participants, if a contact email address is
+specified when registering a country; Python formats such as
+<code class="docutils literal notranslate"><span class="pre">%(username)s</span></code> in this template are substituted with the relevant
+details of the country and the automatically created account).  The
+example version of this file is written for the case where
+<code class="docutils literal notranslate"><span class="pre">matholymp_consent_ui</span></code> is <code class="docutils literal notranslate"><span class="pre">Yes</span></code>; if it is <code class="docutils literal notranslate"><span class="pre">No</span></code>, the text about
+collecting information about consent for certain uses of personal
+data should be removed.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">extensions/email-template-self-reg</span></code> (a similar template for
+emails sent automatically to participants registered using the bulk
+registration mechanism, if a contact email address is specified when
+doing so).</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">extensions/email-template-invitation-change</span></code> (a similar
+template for emails sent automatically to organisers when personal
+details used in invitation letters are changed after such a letter
+has been generated online).</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">html/page.html</span></code> (you may wish to make this file match the
+overall page style used for the static site, although this is not
+required; at least, the stylesheet and shortcut icon URLs will need
+updating, and it should be possible to use the same files for those
+as on the static site).</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">html/dpage.html</span></code> (a simplified page style used for a very
+plain version of the scoreboard for projection; this should probably
+not try to match the static site; the <a class="reference external" href="https://www.egmo.org/egmo-scoredisplay.css">style used for EGMO</a> may give useful
+ideas, or indeed be usable more or less as-is.</p></li>
+</ul>
+<p>You may wish to customise other page templates to fine-tune them for
+your event (for example, if this is the first event of this kind, to
+hide the interface for entering URLs for previous participation by
+countries and people), but they should be usable without such changes.</p>
+</section>
+<section id="initialising-and-running-roundup">
+<h2>Initialising and running Roundup<a class="headerlink" href="#initialising-and-running-roundup" title="Link to this heading">¶</a></h2>
+<p>There are many different possible ways to set up and use Roundup
+described in the Roundup documentation.  The following approach is
+suggested as known to work for matholymp uses, but is not the only
+one.</p>
+<p>Create a user account and corresponding group for use in running
+Roundup (e.g., <code class="docutils literal notranslate"><span class="pre">roundup-xmo</span></code>).  This user account and group should
+own the <code class="file docutils literal notranslate"><span class="pre">db/</span></code> directory, but should not own or have write access
+to any other files in the Roundup instance.  They should be able to
+read all files in the instance.  The <code class="docutils literal notranslate"><span class="pre">config.ini</span></code> file should have
+its group set to this group, and be group-readable but not
+world-readable, because it contains the database password; other files
+may be world-readable.</p>
+<p>Arrange to run Roundup with the provided <strong class="command">roundup-server</strong>,
+running as that user and group, listening on some (fairly arbitrary)
+high port on internal interfaces only.  Set up an init script (or
+systemd unit file, etc.) to start the server, as the appropriate user
+and group, on boot.  This script may usefully call the
+<strong class="command">server-ctl</strong> script included in the Roundup source
+distribution, or an adapted version thereof.</p>
+<p>Set up Apache to provide SSL access (and no unencrypted access, to
+avoid issues with logins over unencrypted connections) to the site.
+Enable <a class="reference external" href="https://httpd.apache.org/docs/current/mod/mod_proxy.html">mod_proxy</a>, but only
+as a reverse proxy, not as a forward proxy (that is, <code class="docutils literal notranslate"><span class="pre">ProxyRequests</span>
+<span class="pre">Off</span></code>).  Set it up to forward requests for appropriate URLs to the
+internal server; inside the relevant <code class="docutils literal notranslate"><span class="pre">VirtualHost</span></code>, put something
+like:</p>
+<pre class="literal-block">ProxyPass /registration/<em>year</em>/ http://localhost:<em>port</em>/<em>name</em>/</pre>
+<p>where <em>name</em> is the instance name passed on the
+<strong class="command">roundup-server</strong> command line (<code class="samp docutils literal notranslate"><span class="pre">-p</span> <em><span class="pre">port</span></em>
+<em><span class="pre">name</span></em><span class="pre">=</span><em><span class="pre">instance-directory</span></em></code>).</p>
+<p>Before starting the server for the first time, the database needs to
+be initialised.  Ensure the database user named in <code class="file docutils literal notranslate"><span class="pre">config.ini</span></code>
+exists and has appropriate permissions to create databases.  (You can
+remove those permissions after initialisation.)  Then run, as the
+Roundup user:</p>
+<pre class="literal-block">roundup-admin -i <em>instance-directory</em> initialise</pre>
+<p>and enter the initial password you wish to use for the <code class="docutils literal notranslate"><span class="pre">admin</span></code>
+user.  Having done this, you can then start the server.</p>
+<p>If, after starting the server, you change either of the
+<code class="file docutils literal notranslate"><span class="pre">config.ini</span></code> files, you need to restart the server for it to
+load the new configuration.  This is not needed for changes to the
+HTML templates.</p>
+</section>
+<section id="online-registration-tasks">
+<h2>Online registration tasks<a class="headerlink" href="#online-registration-tasks" title="Link to this heading">¶</a></h2>
+<p>The following describes how to do various tasks with the online
+registration system.  Most can be done with the web interface
+(generally requiring to be logged in to an administrative account),
+but some require use of <strong class="command">roundup-admin</strong> from the command
+line.  All such commands should be run as the user set up for running
+Roundup.</p>
+<section id="adding-and-editing-miscellaneous-items">
+<h3>Adding and editing miscellaneous items<a class="headerlink" href="#adding-and-editing-miscellaneous-items" title="Link to this heading">¶</a></h3>
+<p>You can add and edit many kinds of items with an administrative
+account (e.g., <span class="guilabel">Add T-shirt Size</span>).  In particular, at an
+early stage of setup you should use <span class="guilabel">Add Arrival/Departure
+Point</span> to add details of the places (e.g., airports) where
+participants may arrive or depart (one of which is likely to be “Own
+travel arrangements” or similar, for local staff not needing airport
+transport).  There may also be local roles to add (<span class="guilabel">Add
+Role</span>).  Initially, both registration of participants and
+preregistration (confirming expected numbers of participants and
+single room requests) are enabled; if you want to have a period where
+only preregistration is possible, you can disable registration before
+adding countries and enable it later.
+<code class="file docutils literal notranslate"><span class="pre">extensions/email-template-new-user</span></code> should be set up to reflect
+which of registration and preregistration are enabled.</p>
+<p>Extra administrative users can be added, with their roles set to
+<code class="docutils literal notranslate"><span class="pre">Admin</span></code>.</p>
+</section>
+<section id="adding-countries">
+<h3>Adding countries<a class="headerlink" href="#adding-countries" title="Link to this heading">¶</a></h3>
+<p>If it seems likely that participants from the country will want papers
+in a language not currently listed in the system, add that language
+(<span class="guilabel">Add Language</span>).</p>
+<p>Countries can be added in bulk, including creating registration system
+accounts and sending details of them by email to specified contacts,
+by uploading a CSV file (<span class="guilabel">Bulk register countries</span>).
+Otherwise, countries can be added individually.</p>
+<p>Create the country (<span class="guilabel">Add Country</span>), including uploading a
+(PNG) flag image (if a flag is available from a previous year in the
+static site, and <code class="docutils literal notranslate"><span class="pre">matholymp_static_site_directory</span></code> in
+<code class="file docutils literal notranslate"><span class="pre">extensions/config.ini</span></code> points to the static site directory,
+that flag will be reused automatically).  If you specify a contact
+email address when creating the country, or when subsequently editing
+it, a registration system account will be created automatically for
+that country and details of it will be sent to that person and the
+registration system administrator.  Otherwise, or if more than one
+account is needed for a country, you can create a registration system
+account manually.  (To do so, create a user account, specifying that
+country as its country, choosing a password for that user and
+assigning it roles <code class="docutils literal notranslate"><span class="pre">User,Register</span></code>.  Send details of that user and
+password to the appropriate contact for that country; they are only
+sent out automatically for users that are created automatically by
+specifying a contact email address when creating or editing a
+country.)</p>
+<p>Once the participating countries have been added, it’s appropriate to
+link to the registration system from the static site.  Set
+<code class="docutils literal notranslate"><span class="pre">event_active_number</span></code> in <code class="file docutils literal notranslate"><span class="pre">staticsite.cfg</span></code>; see
+<a class="reference internal" href="../static-site/#static-site"><span class="std std-ref">Static site generation</span></a> for details.</p>
+</section>
+<section id="registering-staff">
+<h3>Registering staff<a class="headerlink" href="#registering-staff" title="Link to this heading">¶</a></h3>
+<p>Staff can be registered, using an administrative account, in the
+special country automatically created for them.  This can be done in
+bulk, including creating self-registration accounts and sending
+details of them by email to specified addresses, by uploading a CSV
+file (<span class="guilabel">Bulk register participants</span>).  Otherwise, staff can
+be registered individually.</p>
+</section>
+<section id="monitoring-registration">
+<h3>Monitoring registration<a class="headerlink" href="#monitoring-registration" title="Link to this heading">¶</a></h3>
+<p>There is a <span class="guilabel">Registration Status</span> link to a page with a
+summary of possible issues with the registration data, and it is
+useful to keep a watch on this page and to chase up countries that are
+late in completing all required information (as well as acting on
+points there that do not require information from participating
+countries, such as scaling down large photos).</p>
+<p>In addition to the points listed on this page, there are some things
+you should check manually from time to time.</p>
+<ul class="simple">
+<li><p>If any photos are in the wrong orientation, rotate them and upload
+the rotated version; <strong class="command">jpegtran</strong> can be used to rotate JPEG
+images without uncompressing and recompressing.  (Future versions of
+matholymp may add more automation in this area.)</p></li>
+<li><p>If some names are entered with all-uppercase surnames (or entirely
+in uppercase), convert them to mixed case for consistency.  (The
+registration system will show a warning when editing details for a
+person either of whose names is entirely in uppercase.)</p></li>
+<li><p>If a person is registered without a link for previous participation,
+check the list of previous participants and add a link if it seems
+that person did in fact participate previously (checking with the
+relevant country if necessary).</p></li>
+<li><p>Sometimes a registration for one person may have most of the
+registration details changed so it now refers to another person
+(whether in the same role or a different role).  In such cases, the
+link for previous participation, or its absence, should be checked,
+since it may have been correct for the person previously registered
+but not for the new details.</p></li>
+<li><p>If languages chosen seem unlikely for contestants from a given
+country (for example, all contestants from a non-English-speaking
+country requesting only English papers), check the correctness of
+the requested languages with the country in question.</p></li>
+<li><p>If there are multiple registrations for the same person in different
+roles for the staff country, add the additional roles to “Other
+roles” for one of those registrations, and remove the other
+registrations.  Likewise, if a person has both staff and non-staff
+roles, all their staff roles should be listed in “Other roles” for
+their non-staff registration; “OK as secondary role for non-staff?”
+needs setting for such roles (which can be edited after finding them
+through <span class="guilabel">Role List</span>) if not already set for them.</p></li>
+</ul>
+</section>
+<section id="closing-registration">
+<h3>Closing registration<a class="headerlink" href="#closing-registration" title="Link to this heading">¶</a></h3>
+<p>At some point before the event, use <span class="guilabel">Set medal boundaries or
+disable registration</span> to disable registration (including all changes
+by participating countries to registered details of participants), so
+that any countries with late changes to participants need to go
+through the organisers to ensure the organisers can update logistical
+arrangements to handle the changes.  If using preregistration, you can
+disable that at some point if desired (and enable registration if
+initially disabling it); when disabling registration because late
+changes need to go through the organisers, preregistration should be
+disabled as well, as the system treats the combination of registration
+disabled and preregistration enabled as meaning registration has not
+yet started, and displays corresponding messages.  When
+preregistration is disabled, countries can still confirm the default
+numbers of participants, but not otherwise change the expected
+numbers.</p>
+</section>
+<section id="allocating-room-numbers">
+<h3>Allocating room numbers<a class="headerlink" href="#allocating-room-numbers" title="Link to this heading">¶</a></h3>
+<p>If room numbers are entered in the registration system, they can then
+go on name badges automatically (including name badges showing the
+room number of one’s guide and those of other team members).  Room
+numbers should be allocated and entered in the registration system
+manually (there is no automation for allocating rooms or uploading
+room numbers, although if desired the XMLRPC interface to Roundup
+could be used for bulk upload of this or other data).  They can be
+entered through the <span class="guilabel">View and edit room allocations</span> page,
+or on the pages for individual people.</p>
+</section>
+<section id="removing-people-or-countries">
+<h3>Removing people or countries<a class="headerlink" href="#removing-people-or-countries" title="Link to this heading">¶</a></h3>
+<p>When logged in administratively, person and country pages have buttons
+<span class="guilabel">Remove this person (requires confirmation)</span> and
+<span class="guilabel">Remove this country (requires confirmation)</span>.  Those take
+you to a confirmation page; the removal is only effective if you then
+click on <span class="guilabel">Confirm removal of this person</span> or
+<span class="guilabel">Confirm removal of this country</span>.</p>
+<p>Removing a country this way automatically removes the people from that
+country and the registration user from that country, and removes that
+country from the “Guide for” list for any guides for that country (but
+does not remove the registration of those guides, whether or not they
+are also listed as guides for other countries).</p>
+<p>If it is necessary to restore a person or country after removal,
+<strong class="command">roundup-admin restore</strong> can be used.  When restoring a
+country, note the need to restore each person from that country, the
+registration user for that country, and any guides for that country,
+individually.</p>
+</section>
+<section id="removing-a-photo">
+<h3>Removing a photo<a class="headerlink" href="#removing-a-photo" title="Link to this heading">¶</a></h3>
+<p>If, after a photo is uploaded to the registration system, the person
+concerned objects to it being there, it can be removed with:</p>
+<pre class="literal-block">roundup-admin -i <em>instance-directory</em> set personN files=</pre>
+<p>A photo is no longer available over the web to the public when it is
+no longer the current photo uploaded for that person.</p>
+</section>
+<section id="scoring">
+<h3>Scoring<a class="headerlink" href="#scoring" title="Link to this heading">¶</a></h3>
+<p>Score can be entered (<span class="guilabel">Enter scores</span>) with an administrative
+account, or one with roles <code class="docutils literal notranslate"><span class="pre">User,Score</span></code>.  Before scores can be
+entered, registration must have been closed by an administrative
+account.</p>
+<p>An administrative account can enter medal boundaries (<span class="guilabel">Set
+medal boundaries or disable registration</span>).</p>
+</section>
+<section id="during-the-event">
+<h3>During the event<a class="headerlink" href="#during-the-event" title="Link to this heading">¶</a></h3>
+<p>At some point during the event you should determine if any registered
+people have not turned up.  If so, remove them as described above so
+that records for them are not transferred to the static site after the
+event.</p>
+<p>If someone requests a change to the selected languages for exams,
+ensure that the change is made in the registration system and that an
+updated version of the data about people is downloaded for use in
+generating papers.  If someone indicates that their registered name
+should be corrected, again, make that change online so that it is
+reflected in the final data transferred to the static site.</p>
+<p>At appropriate points during the event, add papers to the static site,
+and then add the final results to the static site.  See
+<a class="reference internal" href="../static-site/#static-site"><span class="std std-ref">Static site generation</span></a> for detailed instructions.</p>
+<p>After the final results have been added to the static site, when
+non-public registration data is no longer needed you can set up the
+redirects from registration system URLs to the static site (see
+<a class="reference internal" href="../static-site/#static-site"><span class="std std-ref">Static site generation</span></a>), and shut down the Roundup server.  After an
+appropriate lapse of time for safety, if you are satisfied all the
+public data is correctly on the static site you can then delete the
+database from the database server, and the contents of the <code class="file docutils literal notranslate"><span class="pre">db/</span></code>
+directory.</p>
+</section>
+<section id="displaying-scores">
+<h3>Displaying scores<a class="headerlink" href="#displaying-scores" title="Link to this heading">¶</a></h3>
+<p>A very plain version of the scoreboard that displays multiple
+countries on a page (the number of rows and columns being configurable
+in <code class="file docutils literal notranslate"><span class="pre">extensions/config.ini</span></code>) and automatically rotates through
+all countries is available for showing on screens or projecting at the
+olympiad site.  The system driving the display should run a
+(full-screen) browser pointed to the page
+<code class="docutils literal notranslate"><span class="pre">person?&#64;template=scoredisplay</span></code> within the registration system.
+This browser does not need to be logged in; as with the main
+scoreboard, the display version is public (although it is not linked
+to from other pages, given the limited use of it).</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">matholymp</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro/">Introduction, prerequisites and downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roundup-patches/">Roundup patches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../static-site/">Static site generation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Online registration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-files">Example files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#initialising-and-running-roundup">Initialising and running Roundup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#online-registration-tasks">Online registration tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../document-generation/">Document generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/">Contributing to matholymp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-notes/">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../copying/">Copyright and license</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thanks/">Thanks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo/">Matholymp todo list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../static-site/" title="previous chapter">Static site generation</a></li>
+      <li>Next: <a href="../document-generation/" title="next chapter">Document generation</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2014-2025, Joseph Samuel Myers.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/online-registration.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
