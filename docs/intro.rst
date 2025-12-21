@@ -66,10 +66,11 @@ matholymp:
   source distribution before installing Roundup.  See
   :ref:`roundup-patches` for more details of those patches.
 
-* `PyPDF2 <https://mstamy2.github.io/PyPDF2/>`_ (used in generating
-  PDF documents from registration system data, and also required in
-  the registration system whether document generation is used or not;
-  not needed if those parts of matholymp are not used).
+* `pypdf <https://github.com/py-pdf/pypdf>`_, version 3.1.0 or later
+  (used in generating PDF documents from registration system data, and
+  also required in the registration system whether document generation
+  is used or not; not needed if those parts of matholymp are not
+  used).
 
 * `Pillow <https://python-pillow.org/>`_, built with support for JPEG
   and PNG files.

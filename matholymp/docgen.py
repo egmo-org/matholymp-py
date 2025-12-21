@@ -39,7 +39,7 @@ import re
 import shutil
 import subprocess
 
-from PyPDF2 import PdfFileReader
+from pypdf import PdfReader
 
 from matholymp.collate import coll_get_sort_key
 from matholymp.datetimeutil import date_to_name
@@ -606,8 +606,8 @@ class DocumentGenerator:
             lang_filename_day = lang_filename
         if lang_filename_day not in self._langs_num_pages:
             with open(self.get_paper_pdf(lang_filename_day), 'rb') as pdf_file:
-                r = PdfFileReader(pdf_file)
-                self._langs_num_pages[lang_filename_day] = r.getNumPages()
+                r = PdfReader(pdf_file)
+                self._langs_num_pages[lang_filename_day] = len(r.pages)
         npages = self._langs_num_pages[lang_filename_day]
         if npages == 1:
             return ('\\onepaper{%s}{%s}{%s}{%s}{%s}{}{1}'

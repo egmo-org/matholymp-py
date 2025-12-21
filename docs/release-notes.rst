@@ -137,6 +137,10 @@ Next version (unreleased)
 * The primary source for the software is now `on GitHub
   <https://github.com/egmo-org/matholymp-py>`_.
 
+* Document generation now uses `pypdf
+  <https://github.com/py-pdf/pypdf>`_ (version 3.1.0 or later) rather
+  than the older PyPDF2.
+
 Version 2020.07.0 (22 July 2020)
 --------------------------------
 
