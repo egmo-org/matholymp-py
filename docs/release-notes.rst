@@ -132,7 +132,9 @@ Next version (unreleased)
 
 * There is partial support for handling scans of scripts.  The
   registration system has a new configuration variable
-  ``matholymp_num_exams``.
+  ``matholymp_num_exams``.  New files :file:`script.index.html`,
+  :file:`script.item.html` and :file:`script.manage.html` are added;
+  :file:`page.html` and :file:`person.item.html` are changed.
 
 * The primary source for the software is now `on GitHub
   <https://github.com/egmo-org/matholymp-py>`_.

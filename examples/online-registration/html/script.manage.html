@@ -1,0 +1,88 @@
+<tal:block metal:use-macro="templates/page/macros/icing">
+<title metal:fill-slot="head_title" i18n:translate="">Script scans - <span
+ i18n:name="tracker" tal:replace="config/TRACKER_NAME" /></title>
+<span metal:fill-slot="body_title" tal:omit-tag="python:1"
+ i18n:translate="">Script scans</span>
+
+<td class="content" metal:fill-slot="content">
+
+<span tal:condition="python:not (request.user.hasPermission('Create', 'script')
+ or request.user.hasRole('Anonymous'))"
+ i18n:translate="">You are not allowed to view this page.</span>
+
+<span tal:condition="python:not request.user.hasPermission('Create', 'script')
+ and request.user.hasRole('Anonymous')"
+ i18n:translate="">Please login with your username and password.</span>
+
+<tal:block tal:condition="python:request.user.hasPermission('Create', 'script')">
+
+<p>This page is not the main mechanism for uploading script scans;
+that is the bulk upload system for multi-scan PDFs with cover sheets
+(not yet implemented).</p>
+
+<p>After selecting scripts to upload, use the &lsquo;Save
+changes&rsquo; button (a separate such button for each problem number
+and each day&rsquo;s scratch paper) to save the changes and view the
+results.</p>
+
+<tal:block repeat="pno python:utils.get_problem_numbers(db._db)">
+<form method="POST"
+      name="itemSynopsis"
+      enctype="multipart/form-data"
+      tal:attributes="action request/classname"
+      >
+
+<table class="form">
+<tal:block repeat="person python:utils.contestant_list_sorted(db._db)">
+ <tr>
+  <th i18n:translate=""><tal:block tal:replace="python:utils.contestant_code(db._db, person)"></tal:block> Script Scan P<tal:block tal:replace="python:pno"></tal:block></th>
+  <td><input type="file" size="20" tal:attributes="name string:script-${repeat/person/number}@content">
+  <input type="hidden" tal:attributes="name string:person${person}@link@script_scan_p${pno}; value string:script-${repeat/person/number}"></td>
+ </tr>
+<tal:block tal:condition="python:db.person.getItem(person)['script_scan_p%d' % pno]">
+ <tr><td colspan="2"><a tal:attributes="href python:db.person.getItem(person)['script_scan_p%d' % pno].download_url()">Current Script Scan P<tal:block tal:replace="python:pno"></tal:block></a></td></tr>
+</tal:block>
+</tal:block>
+</table>
+
+<input type="hidden" name="@action" value="edit">
+<input type="hidden" name="@template" value="manage">
+<input name="@csrf" type="hidden"
+       tal:attributes="value python:utils.anti_csrf_nonce()">
+<input type="submit" value="Save changes">
+</form>
+</tal:block>
+
+<tal:block repeat="dno python:utils.get_exam_numbers(db._db)">
+<form method="POST"
+      name="itemSynopsis"
+      enctype="multipart/form-data"
+      tal:attributes="action request/classname"
+      >
+
+<table class="form">
+<tal:block repeat="person python:utils.contestant_list_sorted(db._db)">
+ <tr>
+  <th i18n:translate=""><tal:block tal:replace="python:utils.contestant_code(db._db, person)"></tal:block> Scratch Scan Day <tal:block tal:replace="python:dno"></tal:block></th>
+  <td><input type="file" size="20" tal:attributes="name string:script-${repeat/person/number}@content">
+  <input type="hidden" tal:attributes="name string:person${person}@link@scratch_scan_d${dno}; value string:script-${repeat/person/number}"></td>
+ </tr>
+<tal:block tal:condition="python:db.person.getItem(person)['scratch_scan_d%d' % dno]">
+ <tr><td colspan="2"><a tal:attributes="href python:db.person.getItem(person)['scratch_scan_d%d' % dno].download_url()">Current Scratch Scan Day <tal:block tal:replace="python:dno"></tal:block></a></td></tr>
+</tal:block>
+</tal:block>
+</table>
+
+<input type="hidden" name="@action" value="edit">
+<input type="hidden" name="@template" value="manage">
+<input name="@csrf" type="hidden"
+       tal:attributes="value python:utils.anti_csrf_nonce()">
+<input type="submit" value="Save changes">
+</form>
+</tal:block>
+
+</tal:block>
+
+</td>
+
+</tal:block>

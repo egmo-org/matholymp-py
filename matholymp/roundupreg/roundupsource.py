@@ -38,7 +38,8 @@ from matholymp.datetimeutil import date_from_ymd_iso, time_from_hhmm_str
 from matholymp.fileutil import comma_split
 from matholymp.roundupreg.config import distinguish_official, \
     have_consent_forms, have_id_scans, have_consent_ui, \
-    have_passport_numbers, have_nationality, get_num_problems, get_num_exams, \
+    have_passport_numbers, have_nationality, get_num_problems, \
+    get_problem_numbers, get_num_exams, get_exam_numbers, \
     get_marks_per_problem, get_language_numbers, get_short_name, \
     honourable_mentions_available, event_type, have_remote_participation
 from matholymp.roundupreg.rounduputil import scores_from_str, \
@@ -228,12 +229,40 @@ class RoundupDataSource(DataSource):
                 id_scan_filename = self._db.filename('id_scan',
                                                      id_scan_id)
             return id_scan_filename
-        elif name in ('script_scan_urls', 'script_scan_filenames'):
-            num_problems = get_num_problems(self._db)
-            return [None for n in range(num_problems)]
-        elif name in ('scratch_scan_urls', 'scratch_scan_filenames'):
-            num_exams = get_num_exams(self._db)
-            return [None for n in range(num_exams)]
+        elif name == 'script_scan_urls':
+            ret = []
+            for n in get_problem_numbers(self._db):
+                prop = 'script_scan_p%d' % n
+                scan_id = self._db.person.get(person_id, prop)
+                ret.append(db_file_url(self._db, 'script', 'scan', scan_id))
+            return ret
+        elif name == 'script_scan_filenames':
+            ret = []
+            for n in get_problem_numbers(self._db):
+                prop = 'script_scan_p%d' % n
+                scan_id = self._db.person.get(person_id, prop)
+                if scan_id is None:
+                    ret.append(None)
+                else:
+                    ret.append(self._db.filename('script', scan_id))
+            return ret
+        elif name == 'scratch_scan_urls':
+            ret = []
+            for n in get_exam_numbers(self._db):
+                prop = 'scratch_scan_d%d' % n
+                scan_id = self._db.person.get(person_id, prop)
+                ret.append(db_file_url(self._db, 'script', 'scan', scan_id))
+            return ret
+        elif name == 'scratch_scan_filenames':
+            ret = []
+            for n in get_exam_numbers(self._db):
+                prop = 'scratch_scan_d%d' % n
+                scan_id = self._db.person.get(person_id, prop)
+                if scan_id is None:
+                    ret.append(None)
+                else:
+                    ret.append(self._db.filename('script', scan_id))
+            return ret
         elif name == 'event_photos_consent':
             if not have_consent_ui(self._db):
                 return None

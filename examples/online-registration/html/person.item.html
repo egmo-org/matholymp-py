@@ -698,6 +698,23 @@ select the appropriate options.  You must select &ldquo;Yes&rdquo; or
 </tal:block>
 </tal:block>
 
+<tal:block tal:condition="context/id">
+<tal:block tal:condition="context/is_edit_ok">
+<tal:block tal:condition="python:utils.person_is_contestant(db._db, context.id)">
+<tal:block repeat="pno python:utils.get_problem_numbers(db._db)">
+<tal:block tal:condition="python:context['script_scan_p%d' % pno]">
+ <p><a tal:attributes="href python:context['script_scan_p%d' % pno].download_url()">Script Scan P<tal:block tal:replace="python:pno"></tal:block></a></p>
+</tal:block>
+</tal:block>
+<tal:block repeat="dno python:utils.get_exam_numbers(db._db)">
+<tal:block tal:condition="python:context['scratch_scan_d%d' % dno]">
+ <p><a tal:attributes="href python:context['scratch_scan_d%d' % dno].download_url()">Scratch Scan Day <tal:block tal:replace="python:dno"></tal:block></a></p>
+</tal:block>
+</tal:block>
+</tal:block>
+</tal:block>
+</tal:block>
+
 <tal:block tal:condition="context/is_edit_ok">
 <tal:block tal:condition="context/id">
 <tal:block tal:condition="not:options/error_message | nothing">

@@ -134,6 +134,9 @@ columns string:id;
    <li tal:condition="python:request.user.hasPermission('Create', 'badge_type')">
     <a href="badge_type?@template=item" i18n:translate="">Add Badge Type</a>
    </li>
+   <li tal:condition="python:request.user.hasPermission('Create', 'script')">
+    <a href="script?@template=manage" i18n:translate="">Manage Script Scans</a>
+   </li>
    <li tal:condition="python:request.user.hasPermission('Edit', 'event')">
     <a href="event1"  i18n:translate="">Set medal boundaries or
     disable registration</a>

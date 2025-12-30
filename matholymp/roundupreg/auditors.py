@@ -44,10 +44,11 @@ from matholymp.fileutil import read_text_from_file, file_format_contents, \
 from matholymp.roundupreg.auditorutil import get_new_value, require_value
 from matholymp.roundupreg.config import have_consent_forms, have_id_scans, \
     have_consent_ui, have_passport_numbers, have_nationality, require_diet, \
-    require_dob, get_num_problems, get_marks_per_problem, \
-    get_earliest_date_of_birth, get_sanity_date_of_birth, \
-    get_earliest_date_of_birth_contestant, get_arrdep_bounds, \
-    get_short_name_year, get_contestant_genders, get_invitation_letter_email
+    require_dob, get_num_problems, get_script_scan_props, \
+    get_marks_per_problem, get_earliest_date_of_birth, \
+    get_sanity_date_of_birth, get_earliest_date_of_birth_contestant, \
+    get_arrdep_bounds, get_short_name_year, get_contestant_genders, \
+    get_invitation_letter_email
 from matholymp.roundupreg.roundupemail import send_email
 from matholymp.roundupreg.rounduputil import any_scores_missing, \
     valid_int_str, create_rss, db_file_format_contents, db_file_extension, \
@@ -335,6 +336,35 @@ def audit_person_fields(db, cl, nodeid, newvalues):
             # entered when registration is disabled; the other checks
             # are irrelevant if only scores are being changed.
             return
+
+    # Script scan uploads must also bypass checks on registration
+    # being enabled.
+    have_scan_props = False
+    have_non_scan_props = False
+    script_scan_props = get_script_scan_props(db)
+    for p in sorted(newvalues.keys()):
+        if p in script_scan_props:
+            have_scan_props = True
+        else:
+            have_non_scan_props = True
+    if have_scan_props and have_non_scan_props:
+        raise ValueError(
+            'Cannot upload script scans at same time as other changes')
+    if have_scan_props and nodeid is None:
+        raise ValueError('Cannot upload script scans at registration time')
+    if have_scan_props:
+        primary_role = require_value(db, cl, nodeid, newvalues, 'primary_role',
+                                     'No primary role specified')
+        primary_role_name = db.matholymprole.get(primary_role, 'name')
+        is_contestant = primary_role_name.startswith('Contestant ')
+        if not is_contestant:
+            raise ValueError('Cannot upload script scans for non-contestant')
+        for p in sorted(newvalues.keys()):
+            file_id = newvalues[p]
+            if file_id is not None:
+                audit_file_format(db, 'script', file_id, 'Script scans',
+                                  'script scan', ('pdf',), 'PDF')
+        return
 
     # Only some users can make incomplete registrations.
     allow_incomplete = get_new_value(db, cl, nodeid, newvalues, 'incomplete')

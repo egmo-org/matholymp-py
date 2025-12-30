@@ -45,7 +45,9 @@ __all__ = ['get_config_var', 'get_config_var_bool', 'get_config_var_int',
            'have_id_scans',
            'have_consent_forms', 'have_consent_ui', 'have_passport_numbers',
            'have_nationality', 'require_diet', 'require_dob',
-           'get_num_problems', 'get_num_exams', 'get_marks_per_problem',
+           'get_num_problems', 'get_problem_numbers', 'get_num_exams',
+           'get_exam_numbers', 'get_script_scan_props_desc',
+           'get_script_scan_props', 'get_marks_per_problem',
            'get_num_languages', 'get_language_numbers',
            'get_earliest_date_of_birth', 'get_sanity_date_of_birth',
            'get_earliest_date_of_birth_contestant', 'get_age_day_date',
@@ -173,9 +175,34 @@ def get_num_problems(db):
     return get_config_var_int(db, 'MATHOLYMP_NUM_PROBLEMS')
 
 
+def get_problem_numbers(db):
+    """Return the range of numbers of problems at this event."""
+    return range(1, get_num_problems(db) + 1)
+
+
 def get_num_exams(db):
     """Return the number of exams at this event."""
     return get_config_var_int(db, 'MATHOLYMP_NUM_EXAMS')
+
+
+def get_exam_numbers(db):
+    """Return the range of numbers of exams at this event."""
+    return range(1, get_num_exams(db) + 1)
+
+
+def get_script_scan_props_desc(db):
+    """Return the person properties for script scans, with descriptions."""
+    ret = []
+    for i in get_problem_numbers(db):
+        ret.append(('P%d' % i, 'script_scan_p%d' % i))
+    for i in get_exam_numbers(db):
+        ret.append(('Scratch Day %d' % i, 'scratch_scan_d%d' % i))
+    return ret
+
+
+def get_script_scan_props(db):
+    """Return the person properties for script scans."""
+    return [p[1] for p in get_script_scan_props_desc(db)]
 
 
 def get_marks_per_problem(db):

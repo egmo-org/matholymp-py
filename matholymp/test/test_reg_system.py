@@ -948,7 +948,7 @@ class RegSystemTestCase(unittest.TestCase):
         session = self.get_session()
         forbid_classes = {'event', 'rss', 'arrival', 'badge_type',
                           'consent_form', 'id_scan', 'gender', 'language',
-                          'room_type', 'tshirt', 'user'}
+                          'room_type', 'script', 'tshirt', 'user'}
         forbid_templates = {'country.bulkconfirm.html',
                             'country.bulkregister.html',
                             'country.retireconfirm.html',
@@ -973,7 +973,7 @@ class RegSystemTestCase(unittest.TestCase):
         session = self.get_session('scoring')
         forbid_classes = {'event', 'rss', 'arrival', 'badge_type',
                           'consent_form', 'id_scan', 'gender', 'language',
-                          'room_type', 'tshirt'}
+                          'room_type', 'script', 'tshirt'}
         forbid_templates = {'country.bulkconfirm.html',
                             'country.bulkregister.html',
                             'country.prereg.html',
@@ -1006,7 +1006,8 @@ class RegSystemTestCase(unittest.TestCase):
                             'person.retireconfirm.html',
                             'person.rooms.html',
                             'person.scoreenter.html',
-                            'person.scoreselect.html'}
+                            'person.scoreselect.html',
+                            'script.manage.html'}
         self.all_templates_test(session, forbid_classes=forbid_classes,
                                 forbid_templates=forbid_templates,
                                 allow_templates=set(),
@@ -1025,10 +1026,17 @@ class RegSystemTestCase(unittest.TestCase):
                                     {'photo-1@content': photo_filename,
                                      'consent_form-1@content': pdf_filename,
                                      'id_scan-1@content': pdf_filename})
-        # Set medal boundaries to create an rss item.
+        # Create a contestant so a script can be created.
+        admin_session.create_person('Test Second Country', 'Contestant 1')
+        admin_session.check_open_relative('script?@template=manage')
+        admin_session.b.select_form(
+            admin_session.get_main().find_all('form')[0])
+        admin_session.set({'script-1@content': pdf_filename})
+        admin_session.check_submit_selected()
+        # Set a score to create an rss item.
         admin_session.edit('event', '1',
-                           {'registration_enabled': 'no',
-                            'gold': '40', 'silver': '30', 'bronze': '20'})
+                           {'registration_enabled': 'no'})
+        admin_session.enter_scores('Test Second Country', 'DEF', '1', ['7'])
         for t in sorted(os.listdir(self.instance.html_dir)):
             if t.startswith('_generic') or not t.endswith('.item.html'):
                 continue
@@ -1056,7 +1064,7 @@ class RegSystemTestCase(unittest.TestCase):
         session = self.get_session()
         forbid_classes = {'event', 'rss', 'arrival', 'badge_type',
                           'consent_form', 'id_scan', 'gender', 'language',
-                          'room_type', 'tshirt', 'user'}
+                          'room_type', 'script', 'tshirt', 'user'}
         self.all_templates_item_test(admin_session, session,
                                      forbid_classes=forbid_classes)
 
@@ -1071,7 +1079,7 @@ class RegSystemTestCase(unittest.TestCase):
         # user1 is another user, so gives an error.
         forbid_classes = {'event', 'rss', 'arrival', 'badge_type',
                           'consent_form', 'id_scan', 'gender', 'language',
-                          'room_type', 'tshirt', 'user'}
+                          'room_type', 'script', 'tshirt', 'user'}
         self.all_templates_item_test(admin_session, session,
                                      forbid_classes=forbid_classes)
 
@@ -1083,10 +1091,10 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session = self.get_session('admin')
         admin_session.create_country_generic()
         session = self.get_session('ABC_reg')
-        # consent_form1 and id_scan1 are for another country, so give errors.
-        # user1 is another user, so gives an error.
+        # consent_form1, id_scan1 and script1 are for another country,
+        # so give errors.  user1 is another user, so gives an error.
         forbid_classes = {'badge_type', 'consent_form', 'id_scan', 'event',
-                          'rss', 'user'}
+                          'rss', 'script', 'user'}
         self.all_templates_item_test(admin_session, session,
                                      forbid_classes=forbid_classes)
 
@@ -8136,6 +8144,205 @@ class RegSystemTestCase(unittest.TestCase):
         reg_session.check_open_relative('person?@action=id_scans_zip',
                                         error='You do not have permission to '
                                         'access ID scans', status=403)
+
+    def test_person_script(self):
+        """
+        Test scans of scripts.
+        """
+        session = self.get_session()
+        admin_session = self.get_session('admin')
+        sc1_filename, sc1_bytes = self.gen_test_pdf()
+        sc2_filename, sc2_bytes = self.gen_test_pdf()
+        sc3_filename, sc3_bytes = self.gen_test_pdf()
+        sc4_filename, sc4_bytes = self.gen_test_pdf()
+        admin_session.create_country_generic()
+        admin_session.create_country('DEF', 'Test Second Country')
+        reg_session = self.get_session('ABC_reg')
+        reg2_session = self.get_session('DEF_reg')
+        admin_session.create_person('Test First Country', 'Contestant 1')
+        admin_session.create_person('Test Second Country', 'Contestant 2')
+        admin_csv = admin_session.get_people_csv()
+        admin_csv[0] = {'Script Scan P1 URL':
+                        admin_csv[0]['Script Scan P1 URL'],
+                        'Generic Number': admin_csv[0]['Generic Number']}
+        admin_csv[1] = {'Script Scan P1 URL':
+                        admin_csv[1]['Script Scan P1 URL'],
+                        'Generic Number': admin_csv[1]['Generic Number']}
+        expected = {'Script Scan P1 URL': '', 'Generic Number': ''}
+        self.assertEqual(admin_csv, [expected, expected])
+        admin_session.check_open_relative('script?@template=manage')
+        admin_session.b.select_form(
+            admin_session.get_main().find_all('form')[0])
+        admin_session.set({'script-1@content': sc1_filename,
+                           'script-2@content': sc2_filename})
+        admin_session.check_submit_selected()
+        # Check the script scan linked from the person page.
+        admin_session.check_open_relative('person1')
+        got_bytes = admin_session.get_link_contents(
+            'Script Scan P1')
+        self.assertEqual(got_bytes, sc1_bytes)
+        admin_session.check_open_relative('person2')
+        got_bytes = admin_session.get_link_contents(
+            'Script Scan P1')
+        self.assertEqual(got_bytes, sc2_bytes)
+        admin_csv = admin_session.get_people_csv()
+        admin_csv[0] = {'Script Scan P1 URL':
+                        admin_csv[0]['Script Scan P1 URL'],
+                        'Generic Number': admin_csv[0]['Generic Number']}
+        admin_csv[1] = {'Script Scan P1 URL':
+                        admin_csv[1]['Script Scan P1 URL'],
+                        'Generic Number': admin_csv[1]['Generic Number']}
+        sc1_url_csv = self.instance.url + 'script1/scan.pdf'
+        sc2_url_csv = self.instance.url + 'script2/scan.pdf'
+        # The order in which the two scripts are created from the same
+        # form is not specified.
+        if admin_csv[0]['Script Scan P1 URL'] != sc1_url_csv:
+            sc1_url_csv, sc2_url_csv = sc2_url_csv, sc1_url_csv
+        expected = [{'Script Scan P1 URL': sc1_url_csv, 'Generic Number': ''},
+                    {'Script Scan P1 URL': sc2_url_csv, 'Generic Number': ''}]
+        self.assertEqual(admin_csv, expected)
+        # Check the script scan from the URL in the .csv file.
+        admin_bytes = admin_session.get_bytes(sc1_url_csv)
+        reg_bytes = reg_session.get_bytes(sc1_url_csv)
+        self.assertEqual(admin_bytes, sc1_bytes)
+        self.assertEqual(reg_bytes, sc1_bytes)
+        # Check the scan is not accessible anonymously or by
+        # registering users from other countries.
+        session.check_open(sc1_url_csv,
+                           error='You are not allowed to view this file',
+                           status=403)
+        reg2_session.check_open(sc1_url_csv,
+                                error='You are not allowed to view this file',
+                                status=403)
+        # Test scans for another problem.
+        admin_session.check_open_relative('script?@template=manage')
+        admin_session.b.select_form(
+            admin_session.get_main().find_all('form')[5])
+        admin_session.set({'script-1@content': sc3_filename})
+        admin_session.check_submit_selected()
+        # Check the script scan linked from the person page.
+        admin_session.check_open_relative('person1')
+        got_bytes = admin_session.get_link_contents(
+            'Script Scan P6')
+        self.assertEqual(got_bytes, sc3_bytes)
+        admin_csv = admin_session.get_people_csv()
+        admin_csv[0] = {'Script Scan P6 URL':
+                        admin_csv[0]['Script Scan P6 URL'],
+                        'Generic Number': admin_csv[0]['Generic Number']}
+        admin_csv[1] = {'Script Scan P6 URL':
+                        admin_csv[1]['Script Scan P6 URL'],
+                        'Generic Number': admin_csv[1]['Generic Number']}
+        sc3_url_csv = self.instance.url + 'script3/scan.pdf'
+        expected = [{'Script Scan P6 URL': sc3_url_csv, 'Generic Number': ''},
+                    {'Script Scan P6 URL': '', 'Generic Number': ''}]
+        self.assertEqual(admin_csv, expected)
+        # Check the script scan from the URL in the .csv file.
+        admin_bytes = admin_session.get_bytes(sc3_url_csv)
+        reg_bytes = reg_session.get_bytes(sc3_url_csv)
+        self.assertEqual(admin_bytes, sc3_bytes)
+        self.assertEqual(reg_bytes, sc3_bytes)
+        # Test scans of scratch work.
+        admin_session.check_open_relative('script?@template=manage')
+        admin_session.b.select_form(
+            admin_session.get_main().find_all('form')[7])
+        admin_session.set({'script-1@content': sc4_filename})
+        admin_session.check_submit_selected()
+        # Check the script scan linked from the person page.
+        admin_session.check_open_relative('person1')
+        got_bytes = admin_session.get_link_contents(
+            'Scratch Scan Day 2')
+        self.assertEqual(got_bytes, sc4_bytes)
+        admin_csv = admin_session.get_people_csv()
+        admin_csv[0] = {'Scratch Scan Day 2 URL':
+                        admin_csv[0]['Scratch Scan Day 2 URL'],
+                        'Generic Number': admin_csv[0]['Generic Number']}
+        admin_csv[1] = {'Scratch Scan Day 2 URL':
+                        admin_csv[1]['Scratch Scan Day 2 URL'],
+                        'Generic Number': admin_csv[1]['Generic Number']}
+        sc4_url_csv = self.instance.url + 'script4/scan.pdf'
+        expected = [{'Scratch Scan Day 2 URL': sc4_url_csv,
+                     'Generic Number': ''},
+                    {'Scratch Scan Day 2 URL': '', 'Generic Number': ''}]
+        self.assertEqual(admin_csv, expected)
+        # Check the script scan from the URL in the .csv file.
+        admin_bytes = admin_session.get_bytes(sc4_url_csv)
+        reg_bytes = reg_session.get_bytes(sc4_url_csv)
+        self.assertEqual(admin_bytes, sc4_bytes)
+        self.assertEqual(reg_bytes, sc4_bytes)
+
+    def test_person_script_errors(self):
+        """
+        Test errors for scans of scripts.
+        """
+        admin_session = self.get_session('admin')
+        sc1_filename, dummy = self.gen_test_pdf()
+        scpng_filename, dummy = self.gen_test_image(2, 2, 2, '.png', 'PNG')
+        admin_session.create_country_generic()
+        reg_session = self.get_session('ABC_reg')
+        admin_session.create_person('Test First Country', 'Contestant 1')
+        admin_csv = admin_session.get_people_csv()
+        admin_csv[0] = {'Script Scan P1 URL':
+                        admin_csv[0]['Script Scan P1 URL'],
+                        'Generic Number': admin_csv[0]['Generic Number']}
+        expected = {'Script Scan P1 URL': '', 'Generic Number': ''}
+        self.assertEqual(admin_csv, [expected])
+        admin_session.check_open_relative('script?@template=manage')
+        admin_session.b.select_form(
+            admin_session.get_main().find_all('form')[0])
+        admin_session.set({'script-1@content': scpng_filename})
+        admin_session.check_submit_selected(
+            error='Script scans must be in PDF format')
+        scpng_filename, dummy = self.gen_test_pdf('.png')
+        admin_session.check_open_relative('script?@template=manage')
+        admin_session.b.select_form(
+            admin_session.get_main().find_all('form')[0])
+        admin_session.set({'script-1@content': scpng_filename})
+        admin_session.check_submit_selected(
+            error=r'Filename extension for script scan must match '
+            r'contents \(pdf\)')
+        admin_session.check_open_relative('person1')
+        admin_session.select_main_form()
+        admin_session.b.new_control('file', 'script-1@content',
+                                    open(os.devnull, 'rb'))
+        admin_session.set({'script-1@content': sc1_filename})
+        admin_session.b.new_control('text', '@link@script_scan_p1', 'script-1')
+        admin_session.set({'given_name': 'Modified'})
+        admin_session.check_submit_selected(
+            error='Cannot upload script scans at same time as other changes')
+        admin_session.check_open_relative('person?@template=item')
+        admin_session.select_main_form()
+        form = admin_session.get_main_form()
+        reuse_photo_input = form.find('input', attrs={'name': 'reuse_photo'})
+        reuse_photo_input.extract()
+        admin_session.set({'@required': '', 'incomplete': ''})
+        admin_session.b.new_control('file', 'script-1@content',
+                                    open(os.devnull, 'rb'))
+        admin_session.set({'script-1@content': sc1_filename})
+        admin_session.b.new_control('text', '@link@script_scan_p1', 'script-1')
+        admin_session.check_submit_selected(
+            error='Cannot upload script scans at registration time')
+        admin_session.check_open_relative('script?@template=manage')
+        admin_session.b.select_form(
+            admin_session.get_main().find_all('form')[0])
+        admin_session.set({'script-1@content': sc1_filename})
+        admin2_session = self.get_session('admin')
+        admin2_session.edit('person', '1', {'primary_role': 'Leader'})
+        admin_session.check_submit_selected(
+            error='Cannot upload script scans for non-contestant')
+        reg_session.check_open_relative('person1')
+        reg_session.select_main_form()
+        reg_session.b.new_control('file', 'script-1@content',
+                                  open(os.devnull, 'rb'))
+        reg_session.set({'script-1@content': sc1_filename})
+        reg_session.b.new_control('text', '@link@script_scan_p1', 'script-1')
+        reg_session.check_submit_selected(
+            error='You do not have permission to create script',
+            status=403)
+        admin_csv = admin_session.get_people_csv()
+        admin_csv[0] = {'Script Scan P1 URL':
+                        admin_csv[0]['Script Scan P1 URL'],
+                        'Generic Number': admin_csv[0]['Generic Number']}
+        self.assertEqual(admin_csv, [expected])
 
     def test_person_retire(self):
         """

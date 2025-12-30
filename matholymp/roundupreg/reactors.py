@@ -34,12 +34,14 @@ __all__ = ['country_react', 'person_react', 'scoreboard_react',
 
 import os.path
 
+from pypdf import PdfReader
+
 import roundup.password
 
 from matholymp.fileutil import read_text_from_file
 from matholymp.roundupreg.cache import invalidate_cache
 from matholymp.roundupreg.config import have_consent_forms, have_id_scans, \
-    get_short_name_year
+    get_short_name_year, get_script_scan_props
 from matholymp.roundupreg.roundupemail import send_email
 
 
@@ -94,7 +96,8 @@ def country_react(db, cl, nodeid, oldvalues):
 def person_react(db, cl, nodeid, oldvalues):
     """
     Mark the cached scoreboard invalid, and set the person for a
-    person's photo, ID scan and consent form if required.
+    person's photo, ID scan and consent form, and number of pages for
+    a script scan, if required.
     """
     scoreboard_react(db, cl, nodeid, oldvalues)
     if db.person.is_retired(nodeid):
@@ -116,6 +119,14 @@ def person_react(db, cl, nodeid, oldvalues):
             sc_person = db.id_scan.get(sc_id, 'person')
             if nodeid != sc_person:
                 db.id_scan.set(sc_id, person=nodeid)
+    for p in get_script_scan_props(db):
+        sc_id = db.person.get(nodeid, p)
+        if sc_id:
+            with open(db.filename('script', sc_id), 'rb') as pdf_file:
+                r = PdfReader(pdf_file)
+                pages = len(r.pages)
+                if pages != db.script.get(sc_id, 'pages'):
+                    db.script.set(sc_id, pages=pages)
 
 
 def scoreboard_react(db, cl, nodeid, oldvalues):

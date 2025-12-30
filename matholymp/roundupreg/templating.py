@@ -44,8 +44,8 @@ __all__ = ['people_from_country_internal', 'people_from_country',
            'has_consent_for_photo', 'string_select', 'date_of_birth_select',
            'arrdep_date_select', 'arrdep_time_select', 'photo_consent_select',
            'score_country_select', 'show_incomplete', 'required_person_fields',
-           'register_templating_utils', 'show_prereg_sidebar',
-           'show_prereg_reminder', 'bulk_csv_contents',
+           'contestant_list_sorted', 'register_templating_utils',
+           'show_prereg_sidebar', 'show_prereg_reminder', 'bulk_csv_contents',
            'show_bulk_csv_country', 'show_bulk_csv_country_link_from_code',
            'show_bulk_csv_person', 'bulk_zip_ref', 'required_user_fields',
            'registration_enabled', 'show_scores']
@@ -68,9 +68,9 @@ from matholymp.roundupreg.cache import cached_text
 from matholymp.roundupreg.config import distinguish_official, \
     get_consent_forms_date, have_consent_forms, have_id_scans, \
     have_consent_ui, have_passport_numbers, have_nationality, require_diet, \
-    require_dob, get_language_numbers, get_earliest_date_of_birth, \
-    get_sanity_date_of_birth, get_arrdep_bounds, is_virtual_event, \
-    is_hybrid_event, have_remote_participation
+    require_dob, get_problem_numbers, get_exam_numbers, get_language_numbers, \
+    get_earliest_date_of_birth, get_sanity_date_of_birth, get_arrdep_bounds, \
+    is_virtual_event, is_hybrid_event, have_remote_participation
 from matholymp.roundupreg.roundupsitegen import RoundupSiteGenerator
 from matholymp.roundupreg.rounduputil import person_date_of_birth, \
     contestant_age, person_is_contestant, contestant_code, pn_score, \
@@ -489,6 +489,12 @@ def required_person_fields(db, person):
     return req
 
 
+def contestant_list_sorted(db):
+    """Return a list of contestants sorted by contestant code."""
+    contestants = [p for p in db.person.list() if person_is_contestant(db, p)]
+    return sorted(contestants, key=lambda p: contestant_code(db, p))
+
+
 def show_prereg_sidebar(db, userid):
     """Return whether to show the preregistration link in the sidebar."""
     # The preregistration link is always for one's own country.
@@ -688,6 +694,8 @@ def register_templating_utils(instance):
     instance.registerUtil('have_nationality', have_nationality)
     instance.registerUtil('require_diet', require_diet)
     instance.registerUtil('require_dob', require_dob)
+    instance.registerUtil('get_problem_numbers', get_problem_numbers)
+    instance.registerUtil('get_exam_numbers', get_exam_numbers)
     instance.registerUtil('get_language_numbers', get_language_numbers)
     instance.registerUtil('is_virtual_event', is_virtual_event)
     instance.registerUtil('is_hybrid_event', is_hybrid_event)
@@ -732,6 +740,7 @@ def register_templating_utils(instance):
     instance.registerUtil('yes_no_no_answer_select', yes_no_no_answer_select)
     instance.registerUtil('show_incomplete', show_incomplete)
     instance.registerUtil('required_person_fields', required_person_fields)
+    instance.registerUtil('contestant_list_sorted', contestant_list_sorted)
     instance.registerUtil('show_prereg_sidebar', show_prereg_sidebar)
     instance.registerUtil('show_prereg_reminder', show_prereg_reminder)
     instance.registerUtil('bulk_csv_contents', bulk_csv_contents)

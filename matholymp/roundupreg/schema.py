@@ -56,10 +56,10 @@
 
 from matholymp.roundupreg.config import distinguish_official, \
     have_consent_forms, have_id_scans, have_consent_ui, \
-    have_passport_numbers, have_nationality, get_language_numbers, \
-    invitation_letter_register, is_virtual_event, have_remote_participation, \
-    allow_hybrid_countries
-from matholymp.roundupreg.rounduputil import show_scores
+    have_passport_numbers, have_nationality, get_script_scan_props, \
+    get_language_numbers, invitation_letter_register, is_virtual_event, \
+    have_remote_participation, allow_hybrid_countries
+from matholymp.roundupreg.rounduputil import person_is_contestant, show_scores
 
 __all__ = ['init_schema']
 
@@ -79,6 +79,7 @@ def init_schema(env):
     Multilink = env['Multilink']
     Boolean = env['Boolean']
     Number = env['Number']
+    Integer = env['Integer']
     db = env['db']
 
     # Create classes:
@@ -194,6 +195,9 @@ def init_schema(env):
         person_extra['participation_type'] = String()
     for i in get_language_numbers(db):
         person_extra['language_%d' % i] = Link('language')
+    script_scan_props = get_script_scan_props(db)
+    for prop in script_scan_props:
+        person_extra[prop] = Link('script')
     person = Class(db, 'person',
                    country=Link('country'),
                    given_name=String(),
@@ -264,6 +268,10 @@ def init_schema(env):
     FileClass(db, 'id_scan',
               content=String(indexme='no'),
               name=String(), person=Link('person'))
+
+    FileClass(db, 'script',
+              content=String(indexme='no'),
+              name=String(), pages=Integer(), has_cover_sheet=Boolean())
 
     # Set up permissions:
 
@@ -560,6 +568,38 @@ def init_schema(env):
     p = db.security.addPermission(name='View', klass='consent_form',
                                   check=own_person_consent_form)
     db.security.addPermissionToRole('SelfRegister', p)
+
+    # Managing script scans has its own role.  Registering users can
+    # also view scans for their own country (but only those currently
+    # linked to a contestant, not any older ones that might e.g. have
+    # been wrongly linked and then replaced).
+    db.security.addRole(name='Scan', description='Managing script scans')
+    p = db.security.addPermission(name='Edit', klass='person',
+                                  properties=script_scan_props)
+    db.security.addPermissionToRole('Scan', p)
+    db.security.addPermissionToRole('Scan', 'Create', 'script')
+    db.security.addPermissionToRole('Scan', 'Edit', 'script')
+    db.security.addPermissionToRole('Scan', 'View', 'script')
+
+    def own_country_script(db, userid, itemid):
+        """Determine whether the userid matches the country of the script
+        being accessed."""
+        user_country = db.user.get(userid, 'country')
+        found = False
+        people = db.person.filter(None, {'country': user_country})
+        for person in people:
+            if person_is_contestant(db, person):
+                for prop in script_scan_props:
+                    if db.person.get(person, prop) == itemid:
+                        found = True
+                        break
+                if found:
+                    break
+        return found
+
+    p = db.security.addPermission(name='View', klass='script',
+                                  check=own_country_script)
+    db.security.addPermissionToRole('Register', p)
 
     def own_country(db, userid, itemid):
         """Determine whether the userid matches the country being accessed."""
