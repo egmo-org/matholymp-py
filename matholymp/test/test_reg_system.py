@@ -7895,7 +7895,6 @@ class RegSystemTestCase(unittest.TestCase):
         self.assertEqual(admin_csv, [expected])
         admin_session.edit('person', '1',
                            {'consent_form-1@content': cf_filename})
-        cf_url_csv = self.instance.url + 'consent_form1/consent-form.jpg'
         # Check the consent form linked from the person page.
         admin_session.check_open_relative('person1')
         got_bytes = admin_session.get_link_contents(
@@ -7978,35 +7977,35 @@ class RegSystemTestCase(unittest.TestCase):
         """
         session = self.get_session()
         admin_session = self.get_session('admin')
-        cf_filename, cf_bytes = self.gen_test_pdf()
+        id_filename, id_bytes = self.gen_test_pdf()
         admin_session.create_country_generic()
         admin_session.create_country('DEF', 'Test Second Country')
         reg_session = self.get_session('ABC_reg')
         reg2_session = self.get_session('DEF_reg')
         admin_session.create_person('Test First Country', 'Contestant 1',
-                                    {'id_scan-1@content': cf_filename})
+                                    {'id_scan-1@content': id_filename})
         # Check the ID scan linked from the person page.
         admin_session.check_open_relative('person1')
         got_bytes = admin_session.get_link_contents(
             'ID scan for this person')
-        self.assertEqual(got_bytes, cf_bytes)
+        self.assertEqual(got_bytes, id_bytes)
         admin_csv = admin_session.get_people_csv()
         admin_csv[0] = {'ID Scan URL': admin_csv[0]['ID Scan URL'],
                         'Generic Number': admin_csv[0]['Generic Number']}
-        cf_url_csv = self.instance.url + 'id_scan1/id-scan.pdf'
-        expected = {'ID Scan URL': cf_url_csv, 'Generic Number': ''}
+        id_url_csv = self.instance.url + 'id_scan1/id-scan.pdf'
+        expected = {'ID Scan URL': id_url_csv, 'Generic Number': ''}
         self.assertEqual(admin_csv, [expected])
         # Check the ID scan from the URL in the .csv file.
-        admin_bytes = admin_session.get_bytes(cf_url_csv)
-        reg_bytes = reg_session.get_bytes(cf_url_csv)
-        self.assertEqual(admin_bytes, cf_bytes)
-        self.assertEqual(reg_bytes, cf_bytes)
+        admin_bytes = admin_session.get_bytes(id_url_csv)
+        reg_bytes = reg_session.get_bytes(id_url_csv)
+        self.assertEqual(admin_bytes, id_bytes)
+        self.assertEqual(reg_bytes, id_bytes)
         # Check the form is not accessible anonymously or by
         # registering users from other countries.
-        session.check_open(cf_url_csv,
+        session.check_open(id_url_csv,
                            error='You are not allowed to view this file',
                            status=403)
-        reg2_session.check_open(cf_url_csv,
+        reg2_session.check_open(id_url_csv,
                                 error='You are not allowed to view this file',
                                 status=403)
 
@@ -8017,35 +8016,35 @@ class RegSystemTestCase(unittest.TestCase):
         """
         session = self.get_session()
         admin_session = self.get_session('admin')
-        cf_filename, cf_bytes = self.gen_test_pdf('.PDF')
+        id_filename, id_bytes = self.gen_test_pdf('.PDF')
         admin_session.create_country_generic()
         admin_session.create_country('DEF', 'Test Second Country')
         reg_session = self.get_session('ABC_reg')
         reg2_session = self.get_session('DEF_reg')
         admin_session.create_person('Test First Country', 'Contestant 1',
-                                    {'id_scan-1@content': cf_filename})
+                                    {'id_scan-1@content': id_filename})
         # Check the ID scan linked from the person page.
         admin_session.check_open_relative('person1')
         got_bytes = admin_session.get_link_contents(
             'ID scan for this person')
-        self.assertEqual(got_bytes, cf_bytes)
+        self.assertEqual(got_bytes, id_bytes)
         admin_csv = admin_session.get_people_csv()
         admin_csv[0] = {'ID Scan URL': admin_csv[0]['ID Scan URL'],
                         'Generic Number': admin_csv[0]['Generic Number']}
-        cf_url_csv = self.instance.url + 'id_scan1/id-scan.pdf'
-        expected = {'ID Scan URL': cf_url_csv, 'Generic Number': ''}
+        id_url_csv = self.instance.url + 'id_scan1/id-scan.pdf'
+        expected = {'ID Scan URL': id_url_csv, 'Generic Number': ''}
         self.assertEqual(admin_csv, [expected])
         # Check the ID scan from the URL in the .csv file.
-        admin_bytes = admin_session.get_bytes(cf_url_csv)
-        reg_bytes = reg_session.get_bytes(cf_url_csv)
-        self.assertEqual(admin_bytes, cf_bytes)
-        self.assertEqual(reg_bytes, cf_bytes)
+        admin_bytes = admin_session.get_bytes(id_url_csv)
+        reg_bytes = reg_session.get_bytes(id_url_csv)
+        self.assertEqual(admin_bytes, id_bytes)
+        self.assertEqual(reg_bytes, id_bytes)
         # Check the form is not accessible anonymously or by
         # registering users from other countries.
-        session.check_open(cf_url_csv,
+        session.check_open(id_url_csv,
                            error='You are not allowed to view this file',
                            status=403)
-        reg2_session.check_open(cf_url_csv,
+        reg2_session.check_open(id_url_csv,
                                 error='You are not allowed to view this file',
                                 status=403)
 
@@ -8055,7 +8054,7 @@ class RegSystemTestCase(unittest.TestCase):
         """
         session = self.get_session()
         admin_session = self.get_session('admin')
-        cf_filename, cf_bytes = self.gen_test_pdf()
+        id_filename, id_bytes = self.gen_test_pdf()
         admin_session.create_country_generic()
         admin_session.create_country('DEF', 'Test Second Country')
         reg_session = self.get_session('ABC_reg')
@@ -8067,30 +8066,29 @@ class RegSystemTestCase(unittest.TestCase):
         expected = {'ID Scan URL': '', 'Generic Number': ''}
         self.assertEqual(admin_csv, [expected])
         admin_session.edit('person', '1',
-                           {'id_scan-1@content': cf_filename})
-        cf_url_csv = self.instance.url + 'id_scan1/id-scan.jpg'
+                           {'id_scan-1@content': id_filename})
         # Check the ID scan linked from the person page.
         admin_session.check_open_relative('person1')
         got_bytes = admin_session.get_link_contents(
             'ID scan for this person')
-        self.assertEqual(got_bytes, cf_bytes)
+        self.assertEqual(got_bytes, id_bytes)
         admin_csv = admin_session.get_people_csv()
         admin_csv[0] = {'ID Scan URL': admin_csv[0]['ID Scan URL'],
                         'Generic Number': admin_csv[0]['Generic Number']}
-        cf_url_csv = self.instance.url + 'id_scan1/id-scan.pdf'
-        expected = {'ID Scan URL': cf_url_csv, 'Generic Number': ''}
+        id_url_csv = self.instance.url + 'id_scan1/id-scan.pdf'
+        expected = {'ID Scan URL': id_url_csv, 'Generic Number': ''}
         self.assertEqual(admin_csv, [expected])
         # Check the ID scan from the URL in the .csv file.
-        admin_bytes = admin_session.get_bytes(cf_url_csv)
-        reg_bytes = reg_session.get_bytes(cf_url_csv)
-        self.assertEqual(admin_bytes, cf_bytes)
-        self.assertEqual(reg_bytes, cf_bytes)
+        admin_bytes = admin_session.get_bytes(id_url_csv)
+        reg_bytes = reg_session.get_bytes(id_url_csv)
+        self.assertEqual(admin_bytes, id_bytes)
+        self.assertEqual(reg_bytes, id_bytes)
         # Check the form is not accessible anonymously or by
         # registering users from other countries.
-        session.check_open(cf_url_csv,
+        session.check_open(id_url_csv,
                            error='You are not allowed to view this file',
                            status=403)
-        reg2_session.check_open(cf_url_csv,
+        reg2_session.check_open(id_url_csv,
                                 error='You are not allowed to view this file',
                                 status=403)
 
@@ -8104,9 +8102,9 @@ class RegSystemTestCase(unittest.TestCase):
         expected_contents = ['id-scans/README.txt']
         self.assertEqual(admin_contents, expected_contents)
         admin_zip_empty.close()
-        cf_filename, cf_bytes = self.gen_test_pdf()
+        id_filename, id_bytes = self.gen_test_pdf()
         admin_session.create_person('XMO 2015 Staff', 'Coordinator',
-                                    {'id_scan-1@content': cf_filename})
+                                    {'id_scan-1@content': id_filename})
         admin_zip = admin_session.get_id_scans_zip()
         admin_contents = [f.filename for f in admin_zip.infolist()]
         expected_contents = ['id-scans/README.txt',
@@ -8114,7 +8112,7 @@ class RegSystemTestCase(unittest.TestCase):
         self.assertEqual(admin_contents, expected_contents)
         self.assertEqual(
             admin_zip.read('id-scans/person1/id-scan.pdf'),
-            cf_bytes)
+            id_bytes)
         admin_zip.close()
 
     def test_person_id_scan_zip_errors(self):
