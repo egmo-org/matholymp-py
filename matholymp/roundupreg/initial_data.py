@@ -98,7 +98,8 @@ def init_data(env):
                      'expected_observers_b': '0',
                      'expected_observers_c': '0',
                      'expected_single_rooms': '0',
-                     'expected_numbers_confirmed': True}
+                     'expected_numbers_confirmed': True,
+                     'future_contact_1_public': False}
     if distinguish_official(db):
         country_extra['official'] = False
     staff_country = country.create(code='ZZA', name=staff_country_name,

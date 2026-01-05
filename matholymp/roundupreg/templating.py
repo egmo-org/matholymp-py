@@ -69,8 +69,9 @@ from matholymp.roundupreg.config import distinguish_official, \
     get_consent_forms_date, have_consent_forms, have_id_scans, \
     have_consent_ui, have_passport_numbers, have_nationality, require_diet, \
     require_dob, get_problem_numbers, get_exam_numbers, get_language_numbers, \
-    get_earliest_date_of_birth, get_sanity_date_of_birth, get_arrdep_bounds, \
-    is_virtual_event, is_hybrid_event, have_remote_participation
+    get_future_contact_numbers, get_earliest_date_of_birth, \
+    get_sanity_date_of_birth, get_arrdep_bounds, is_virtual_event, \
+    is_hybrid_event, have_remote_participation
 from matholymp.roundupreg.roundupsitegen import RoundupSiteGenerator
 from matholymp.roundupreg.rounduputil import person_date_of_birth, \
     contestant_age, person_is_contestant, contestant_code, pn_score, \
@@ -697,6 +698,8 @@ def register_templating_utils(instance):
     instance.registerUtil('get_problem_numbers', get_problem_numbers)
     instance.registerUtil('get_exam_numbers', get_exam_numbers)
     instance.registerUtil('get_language_numbers', get_language_numbers)
+    instance.registerUtil('get_future_contact_numbers',
+                          get_future_contact_numbers)
     instance.registerUtil('is_virtual_event', is_virtual_event)
     instance.registerUtil('is_hybrid_event', is_hybrid_event)
     instance.registerUtil('have_remote_participation',

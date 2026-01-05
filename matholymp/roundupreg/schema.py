@@ -57,8 +57,9 @@
 from matholymp.roundupreg.config import distinguish_official, \
     have_consent_forms, have_id_scans, have_consent_ui, \
     have_passport_numbers, have_nationality, get_script_scan_props, \
-    get_language_numbers, invitation_letter_register, is_virtual_event, \
-    have_remote_participation, allow_hybrid_countries
+    get_language_numbers, get_future_contact_numbers, \
+    invitation_letter_register, is_virtual_event, have_remote_participation, \
+    allow_hybrid_countries
 from matholymp.roundupreg.rounduputil import person_is_contestant, show_scores
 
 __all__ = ['init_schema']
@@ -100,6 +101,9 @@ def init_schema(env):
     country_extra = {}
     if distinguish_official(db):
         country_extra['official'] = Boolean()
+    for n in get_future_contact_numbers(db):
+        country_extra['future_contact_email_%d' % n] = String()
+        country_extra['future_contact_name_%d' % n] = String()
     if have_remote_participation(db):
         # participation_type is only relevant for hybrid events, but
         # include in the schema for virtual events as well, given the
@@ -126,6 +130,8 @@ def init_schema(env):
                     expected_numbers_confirmed=Boolean(),
                     billing_address=String(),
                     leader_email=String(),
+                    future_contact_organisation=String(),
+                    future_contact_1_public=Boolean(),
                     **country_extra)
     country.setkey('name')
     country.setorderprop('code')
@@ -611,7 +617,11 @@ def init_schema(env):
                     'expected_contestants', 'expected_observers_a',
                     'expected_observers_b', 'expected_observers_c',
                     'expected_single_rooms', 'expected_numbers_confirmed',
-                    'billing_address', 'leader_email']
+                    'billing_address', 'leader_email',
+                    'future_contact_organisation', 'future_contact_1_public']
+    for n in get_future_contact_numbers(db):
+        prereg_props.append('future_contact_email_%d' % n)
+        prereg_props.append('future_contact_name_%d' % n)
     if have_remote_participation(db):
         prereg_props.append('participation_type')
         prereg_props.append('physical_address')

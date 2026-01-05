@@ -49,6 +49,7 @@ __all__ = ['get_config_var', 'get_config_var_bool', 'get_config_var_int',
            'get_exam_numbers', 'get_script_scan_props_desc',
            'get_script_scan_props', 'get_marks_per_problem',
            'get_num_languages', 'get_language_numbers',
+           'get_num_future_contacts', 'get_future_contact_numbers',
            'get_earliest_date_of_birth', 'get_sanity_date_of_birth',
            'get_earliest_date_of_birth_contestant', 'get_age_day_date',
            'get_arrdep_bounds', 'get_short_name', 'get_year',
@@ -220,6 +221,16 @@ def get_num_languages(db):
 def get_language_numbers(db):
     """Return the numbers of language database properties for a person."""
     return range(1, get_num_languages(db) + 1)
+
+
+def get_num_future_contacts(db):
+    """Return the maximum number of future contacts."""
+    return get_config_var_int(db, 'MATHOLYMP_NUM_FUTURE_CONTACTS')
+
+
+def get_future_contact_numbers(db):
+    """Return the numbers of future contact database properties."""
+    return range(1, get_num_future_contacts(db) + 1)
 
 
 def get_earliest_date_of_birth(db):

@@ -45,10 +45,10 @@ from matholymp.roundupreg.auditorutil import get_new_value, require_value
 from matholymp.roundupreg.config import have_consent_forms, have_id_scans, \
     have_consent_ui, have_passport_numbers, have_nationality, require_diet, \
     require_dob, get_num_problems, get_script_scan_props, \
-    get_marks_per_problem, get_earliest_date_of_birth, \
-    get_sanity_date_of_birth, get_earliest_date_of_birth_contestant, \
-    get_arrdep_bounds, get_short_name_year, get_contestant_genders, \
-    get_invitation_letter_email
+    get_future_contact_numbers, get_marks_per_problem, \
+    get_earliest_date_of_birth, get_sanity_date_of_birth, \
+    get_earliest_date_of_birth_contestant, get_arrdep_bounds, \
+    get_short_name_year, get_contestant_genders, get_invitation_letter_email
 from matholymp.roundupreg.roundupemail import send_email
 from matholymp.roundupreg.rounduputil import any_scores_missing, \
     valid_int_str, create_rss, db_file_format_contents, db_file_extension, \
@@ -161,20 +161,33 @@ def audit_country_fields(db, cl, nodeid, newvalues):
                              'can have participants')
 
     # If a contact email address is specified, it must be valid.
-    if 'contact_email' in newvalues and newvalues['contact_email'] is not None:
-        if not valid_address(newvalues['contact_email']):
-            raise ValueError('Email address syntax is invalid')
+    # Likewise for a leader email address.  Likewise for future
+    # contact addresses.
+    email_props = ['contact_email', 'leader_email']
+    for n in get_future_contact_numbers(db):
+        email_props.append('future_contact_email_%d' % n)
+    emails = []
+    for prop in email_props:
+        if prop in newvalues and newvalues[prop] is not None:
+            emails.append(newvalues[prop])
     if 'contact_extra' in newvalues and newvalues['contact_extra'] is not None:
-        emails = [val.strip()
-                  for val in newvalues['contact_extra'].split('\n')]
-        emails = [val for val in emails if val]
-        for email in emails:
-            if not valid_address(email):
-                raise ValueError('Email address syntax is invalid')
-    # Likewise for a leader email address.
-    if 'leader_email' in newvalues and newvalues['leader_email'] is not None:
-        if not valid_address(newvalues['leader_email']):
+        extra_emails = [val.strip()
+                        for val in newvalues['contact_extra'].split('\n')]
+        extra_emails = [val for val in extra_emails if val]
+        emails.extend(extra_emails)
+    for email in emails:
+        if not valid_address(email):
             raise ValueError('Email address syntax is invalid')
+
+    # If a future contact name is specified, there must be a
+    # corresponding email address.
+    for n in get_future_contact_numbers(db):
+        this_email = get_new_value(db, cl, nodeid, newvalues,
+                                   'future_contact_email_%d' % n)
+        this_name = get_new_value(db, cl, nodeid, newvalues,
+                                  'future_contact_name_%d' % n)
+        if this_name and not this_email:
+            raise ValueError('Future contact name given without email address')
 
     userid = db.getuid()
     if (nodeid is not None
@@ -271,6 +284,36 @@ def audit_country_fields(db, cl, nodeid, newvalues):
         if not guok:
             raise ValueError(gudesc + ' for previous participation must'
                              ' be in the form ' + gubase + 'N/')
+
+    # Send email for future contact details changed after an
+    # invitation letter has been generated.  Logically this might
+    # belong in the reactor rather than the auditor, but details of
+    # what changed are more readily available here; the reactor
+    # receives the full set of old property values, whether or not
+    # changed, and would need to look up new values and compare.
+    if nodeid is not None:
+        changed_keys = sorted(
+            k for k in newvalues if k.startswith('future_contact_'))
+        if changed_keys:
+            changes = []
+            for k in changed_keys:
+                newval = newvalues[k]
+                if newval is None:
+                    newval_text = '%s REMOVED' % k
+                elif k == 'future_contact_1_public':
+                    newval_text = '%s: %s' % (k, 'Yes' if newval else 'No')
+                else:
+                    newval_text = '%s: %s' % (k, newval)
+                changes.append(newval_text)
+            template_path = os.path.join(db.config.TRACKER_HOME, 'extensions',
+                                         'email-template-future-contact')
+            template_text = read_text_from_file(template_path)
+            email_text = template_text % {'country': name,
+                                          'changes': '\n'.join(changes)}
+            short_name_year = get_short_name_year(db)
+            subject = ('%s future contact details change (%s)'
+                       % (short_name_year, name))
+            send_email(db, [], subject, email_text, 'futurecontact')
 
 
 def audit_person_arrdep(db, cl, nodeid, newvalues, kind):

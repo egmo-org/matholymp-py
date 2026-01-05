@@ -1996,7 +1996,9 @@ class SiteGenerator:
                          'Expected Single Rooms',
                          'Expected Numbers Confirmed', 'Billing Address',
                          'Leader Email', 'Physical Address',
-                         'Participation Type'])
+                         'Participation Type', 'Future Contact Organisation',
+                         'Future Contact 1 Public', 'Future Contact Emails',
+                         'Future Contact Names'])
         if not reg_system:
             cols.extend(['Contestants', 'Gold Medals', 'Silver Medals',
                          'Bronze Medals'])
@@ -2058,6 +2060,14 @@ class SiteGenerator:
             csv_out['Leader Email'] = c.leader_email or ''
             csv_out['Physical Address'] = c.physical_address or ''
             csv_out['Participation Type'] = c.participation_type or ''
+            csv_out['Future Contact Organisation'] = (
+                c.future_contact_organisation or '')
+            csv_out['Future Contact 1 Public'] = (
+                'Yes' if c.future_contact_1_public else 'No')
+            csv_out['Future Contact Emails'] = comma_join(
+                c.future_contact_emails)
+            csv_out['Future Contact Names'] = comma_join(
+                [name or '' for name in c.future_contact_names])
         if not reg_system:
             if c.num_contestants:
                 csv_out['Contestants'] = str(c.num_contestants)

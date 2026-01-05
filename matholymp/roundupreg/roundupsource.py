@@ -40,8 +40,9 @@ from matholymp.roundupreg.config import distinguish_official, \
     have_consent_forms, have_id_scans, have_consent_ui, \
     have_passport_numbers, have_nationality, get_num_problems, \
     get_problem_numbers, get_num_exams, get_exam_numbers, \
-    get_marks_per_problem, get_language_numbers, get_short_name, \
-    honourable_mentions_available, event_type, have_remote_participation
+    get_marks_per_problem, get_language_numbers, get_future_contact_numbers, \
+    get_short_name, honourable_mentions_available, event_type, \
+    have_remote_participation
 from matholymp.roundupreg.rounduputil import scores_from_str, \
     person_date_of_birth, contestant_age, db_file_url, person_is_remote
 
@@ -415,10 +416,11 @@ class RoundupDataSource(DataSource):
         country_id = str(country_id)
         if name == 'annual_url':
             return self._db.config.TRACKER_WEB + 'country' + country_id
-        elif name == 'code':
-            return self._db.country.get(country_id, 'code')
-        elif name == 'name':
-            return self._db.country.get(country_id, 'name')
+        elif name in ('code', 'name', 'expected_numbers_confirmed',
+                      'billing_address', 'leader_email',
+                      'future_contact_organisation',
+                      'future_contact_1_public'):
+            return self._db.country.get(country_id, name)
         elif name == 'flag_url':
             flag_id = self._db.country.get(country_id, 'flag')
             return db_file_url(self._db, 'flag', 'flag', flag_id)
@@ -450,11 +452,6 @@ class RoundupDataSource(DataSource):
                       'expected_observers_b', 'expected_observers_c',
                       'expected_single_rooms'):
             return int(self._db.country.get(country_id, name))
-        elif name == 'expected_numbers_confirmed':
-            return self._db.country.get(country_id,
-                                        'expected_numbers_confirmed')
-        elif name in ('billing_address', 'leader_email'):
-            return self._db.country.get(country_id, name)
         elif name == 'physical_address':
             if not have_remote_participation(self._db):
                 return None
@@ -464,6 +461,24 @@ class RoundupDataSource(DataSource):
             if this_event_type in ('in-person', 'virtual'):
                 return this_event_type
             return self._db.country.get(country_id, 'participation_type')
+        elif name == 'future_contact_emails':
+            ret = []
+            for n in get_future_contact_numbers(self._db):
+                email = self._db.country.get(
+                    country_id, 'future_contact_email_%d' % n)
+                if email:
+                    ret.append(email)
+            return ret
+        elif name == 'future_contact_names':
+            ret = []
+            for n in get_future_contact_numbers(self._db):
+                email = self._db.country.get(
+                    country_id, 'future_contact_email_%d' % n)
+                if email:
+                    name = self._db.country.get(
+                        country_id, 'future_contact_name_%d' % n)
+                    ret.append(name)
+            return ret
         elif name == '_person_ids':
             person_list = self._db.person.filter(None, {'country': country_id})
             return [int(p) for p in person_list]

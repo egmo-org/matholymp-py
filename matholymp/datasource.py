@@ -146,7 +146,9 @@ class DataSource:
         expected_observers_b, expected_observers_c,
         expected_single_rooms, expected_numbers_confirmed, billing_address,
         leader_email, physical_address, participation_type,
-        _person_ids, _guide_ids, generic_id.
+        future_contact_organisation, future_contact_1_public,
+        future_contact_emails, future_contact_names, _person_ids, _guide_ids,
+        generic_id.
         """
         raise NotImplementedError
 

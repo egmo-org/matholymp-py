@@ -2100,6 +2100,31 @@ class CountryEvent:
         ('in-person', 'hybrid', 'virtual' or None if unknown).
         """)
 
+    # All the future contact details should logically be associated
+    # with the Country not the CountryEvent but are currently
+    # associated with the CountryEvent for implementation convenient.
+
+    future_contact_organisation = _CountryEventPropertyDS(
+        'future_contact_organisation',
+        """The future contact organisation for this country at this event.""")
+
+    future_contact_1_public = _CountryEventPropertyDS(
+        'future_contact_1_public',
+        """
+        Whether the first future contact for this country at this
+        event is public.
+        """)
+
+    future_contact_emails = _CountryEventPropertyDS(
+        'future_contact_emails',
+        """
+        The future contact email addresses for this country at this event.
+        """)
+
+    future_contact_names = _CountryEventPropertyDS(
+        'future_contact_names',
+        """The future contact email names for this country at this event.""")
+
     def _get_person_list(self):
         ds = self.country.event_group._ds
         if ds.country_event_have_attr(self.country.id, self.event.id,

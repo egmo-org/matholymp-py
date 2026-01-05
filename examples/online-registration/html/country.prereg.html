@@ -147,6 +147,39 @@ define="edit_ok context/is_edit_ok"
  </tal:block>
 
  <tr>
+  <td colspan="2">Contact details can be specified for use
+  for <strong>future</strong> events.  You can also give the name of
+  the olympiad organization responsible for this country&rsquo;s
+  participation; this may appear on a public contact list, as may the
+  first contact name and email address given if you opt in to making
+  them public. At least one contact email address should be given if
+  possible. The name accompanying each email address is optional;
+  typically you would give it for a personal address but not for a
+  role address.</td>
+ </tr>
+
+ <tr tal:define="name string:future_contact_organisation; label string:Responsible organisation; value context/future_contact_organisation; edit_ok edit_ok">
+  <th metal:use-macro="th_label">Responsible organisation</th>
+  <td><input name="future_contact_organisation" metal:use-macro="normal_input"></td>
+ </tr>
+
+ <tr tal:define="name string:future_contact_1_public; label string:First contact public?; value context/future_contact_1_public; edit_ok edit_ok">
+  <th class="required" metal:use-macro="th_label">First contact public?</th>
+  <td tal:content="structure context/future_contact_1_public/field">public</td>
+ </tr>
+
+<tal:block repeat="contactno python:utils.get_future_contact_numbers(db._db)">
+ <tr tal:define="name python:'future_contact_email_%d' % contactno; label python:'Future contact email %d' % contactno; value python:context['future_contact_email_%d' % contactno]; edit_ok edit_ok" tal:condition="context/is_edit_ok">
+  <th metal:use-macro="th_label">Future contact email <tal:block tal:replace="repeat/contactno"></tal:block></th>
+  <td><input tal:attributes="name python:name" metal:use-macro="normal_input"></td>
+ </tr>
+ <tr tal:define="name python:'future_contact_name_%d' % contactno; label python:'Future contact name %d' % contactno; value python:context['future_contact_name_%d' % contactno]; edit_ok edit_ok" tal:condition="context/is_edit_ok">
+  <th metal:use-macro="th_label">Future contact name <tal:block tal:replace="repeat/contactno"></tal:block></th>
+  <td><input tal:attributes="name python:name" metal:use-macro="normal_input"></td>
+ </tr>
+</tal:block>
+
+ <tr>
   <td>
    &nbsp;
    <input type="hidden" name="expected_numbers_confirmed" value="yes">

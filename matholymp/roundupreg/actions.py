@@ -65,8 +65,8 @@ from matholymp.roundupreg.bulkreg import bulk_csv_data, \
     bulk_csv_person_number_url, bulk_zip_data
 from matholymp.roundupreg.cache import cached_bin
 from matholymp.roundupreg.config import distinguish_official, \
-    have_consent_ui, get_marks_per_problem, get_short_name_year, \
-    badge_use_background, get_docgen_path
+    have_consent_ui, get_marks_per_problem, get_future_contact_numbers, \
+    get_short_name_year, badge_use_background, get_docgen_path
 from matholymp.roundupreg.roundupemail import send_email
 from matholymp.roundupreg.roundupsitegen import RoundupSiteGenerator
 from matholymp.roundupreg.roundupsource import RoundupDataSource
@@ -821,13 +821,18 @@ class CountryBulkRegisterAction(BulkRegisterAction):
                 'expected_numbers_confirmed': False}
 
     def get_str_column_map(self):
-        return {'Name': 'name', 'Code': 'code'}
+        cols = {'Name': 'name', 'Code': 'code',
+                'Contact Organisation': 'future_contact_organisation'}
+        for n in get_future_contact_numbers(self.db):
+            cols['Contact Email %d' % n] = 'future_contact_email_%d' % n
+            cols['Contact Name %d' % n] = 'future_contact_name_%d' % n
+        return cols
 
     def get_bool_column_map(self):
+        cols = {'Contact 1 Public': 'future_contact_1_public'}
         if distinguish_official(self.db):
-            return {self.db.config.ext['MATHOLYMP_OFFICIAL_DESC']: 'official'}
-        else:
-            return {}
+            cols[self.db.config.ext['MATHOLYMP_OFFICIAL_DESC']] = 'official'
+        return cols
 
     def map_csv_data(self, row, newvalues):
         dummy_number, generic_url = bulk_csv_country_number_url(self.db, row)

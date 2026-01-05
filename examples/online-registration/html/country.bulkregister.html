@@ -36,13 +36,16 @@ CSV files must be encoded in UTF-8 (BOM optional). They may contain
 the following columns, in any order: Country Number (optional), Name
 (required), Code
 (required)<tal:block tal:condition="python:utils.distinguish_official(db._db)"
-		     tal:replace="python:', %s (required)' % db._db.config.ext['MATHOLYMP_OFFICIAL_DESC']" />.  In addition, they may contain
+		     tal:replace="python:', %s (required)' % db._db.config.ext['MATHOLYMP_OFFICIAL_DESC']" />,
+Contact Organisation (optional), Contact 1 Public (optional).
+In addition, they may contain
 any number of columns with names &lsquo;Contact Email 1&rsquo;,
 &lsquo;Contact Email 2&rsquo;, etc., giving contact email addresses
 for each country.  Country numbers are the numbers in the
 <tal:block tal:replace="python:db._db.config.ext['MATHOLYMP_GENERIC_URL_DESC']"
 /> for previous participation, or empty for a country that has not
-previously participated.  Unknown columns are ignored.
+previously participated.  Contact 1 Public, if given, must be one of
+&lsquo;Yes&rsquo; and &lsquo;No&rsquo;.  Unknown columns are ignored.
 </td>
 </tr>
 

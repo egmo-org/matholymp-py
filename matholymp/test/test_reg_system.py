@@ -517,6 +517,10 @@ class RoundupTestSession:
             del entry['Billing Address']
             del entry['Leader Email']
             del entry['Participation Type']
+            del entry['Future Contact Organisation']
+            del entry['Future Contact 1 Public']
+            del entry['Future Contact Emails']
+            del entry['Future Contact Names']
         return countries_csv
 
     def get_people_csv(self):
@@ -1161,7 +1165,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_staff])
         self.assertEqual(admin_csv, [expected_staff_admin])
         admin_session.create_country_generic()
@@ -1187,7 +1195,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_abc, expected_staff])
         self.assertEqual(admin_csv, [expected_abc_admin, expected_staff_admin])
         self.assertEqual(reg_csv, [expected_abc, expected_staff])
@@ -1341,7 +1353,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'virtual'})
+             'Participation Type': 'virtual',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_staff])
         self.assertEqual(admin_csv, [expected_staff_admin])
         admin_session.create_country_generic()
@@ -1367,7 +1383,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'virtual'})
+             'Participation Type': 'virtual',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_abc, expected_staff])
         self.assertEqual(admin_csv, [expected_abc_admin, expected_staff_admin])
         self.assertEqual(reg_csv, [expected_abc, expected_staff])
@@ -1409,7 +1429,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': ''})
+             'Participation Type': '',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_staff])
         self.assertEqual(admin_csv, [expected_staff_admin])
         admin_session.create_country_generic()
@@ -1435,7 +1459,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': ''})
+             'Participation Type': '',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_abc, expected_staff])
         self.assertEqual(admin_csv, [expected_abc_admin, expected_staff_admin])
         self.assertEqual(reg_csv, [expected_abc, expected_staff])
@@ -1474,7 +1502,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_abc, expected_def,
                                     expected_staff])
         self.assertEqual(admin_csv, [expected_abc_admin, expected_def_admin,
@@ -1504,7 +1536,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'virtual'})
+             'Participation Type': 'virtual',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_abc, expected_def, expected_ghi,
                                     expected_staff])
         self.assertEqual(admin_csv, [expected_abc_admin, expected_def_admin,
@@ -1536,7 +1572,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'hybrid'})
+             'Participation Type': 'hybrid',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_abc, expected_def, expected_ghi,
                                     expected_jkl, expected_staff])
         self.assertEqual(admin_csv, [expected_abc_admin, expected_def_admin,
@@ -2980,6 +3020,14 @@ class RegSystemTestCase(unittest.TestCase):
             'country', '1',
             {'leader_email': 'bad_email'},
             error='Email address syntax is invalid')
+        admin_session.edit(
+            'country', '1',
+            {'future_contact_email_1': 'bad_email'},
+            error='Email address syntax is invalid')
+        admin_session.edit(
+            'country', '1',
+            {'future_contact_name_5': 'name without email'},
+            error='Future contact name given without email address')
         anon_csv = session.get_countries_csv()
         admin_csv = admin_session.get_countries_csv_public_only()
         self.assertEqual(anon_csv, [expected_abc, expected_staff])
@@ -3023,7 +3071,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         expected_def_admin = expected_def.copy()
         expected_def_admin.update(
             {'Contact Emails': '',
@@ -3038,7 +3090,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         expected_staff_admin = expected_staff.copy()
         expected_staff_admin.update(
             {'Contact Emails': '',
@@ -3053,7 +3109,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(admin_csv,
                          [expected_abc_admin, expected_def_admin,
                           expected_staff_admin])
@@ -3241,6 +3301,14 @@ class RegSystemTestCase(unittest.TestCase):
         reg_session.edit_prereg('3',
                                 {'leader_email': 'bad'},
                                 error='Email address syntax is invalid')
+        reg_session.edit_prereg('3',
+                                {'future_contact_email_2': 'bad_email'},
+                                error='Email address syntax is invalid')
+        reg_session.edit_prereg('3',
+                                {'future_contact_name_4':
+                                 'name without email'},
+                                error='Future contact name given without '
+                                'email address')
         anon_csv = session.get_countries_csv()
         admin_csv = admin_session.get_countries_csv()
         self.assertEqual(anon_csv,
@@ -3259,7 +3327,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         expected_staff_admin = expected_staff.copy()
         expected_staff_admin.update(
             {'Contact Emails': '',
@@ -3274,7 +3346,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(admin_csv,
                          [expected_abc_admin, expected_staff_admin])
 
@@ -3366,7 +3442,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': 'some address',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         expected_staff_admin = expected_staff.copy()
         expected_staff_admin.update(
             {'Contact Emails': '',
@@ -3381,7 +3461,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(admin_csv,
                          [expected_abc_admin, expected_staff_admin])
 
@@ -3421,7 +3505,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': ''})
+             'Participation Type': '',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         expected_staff_admin = expected_staff.copy()
         expected_staff_admin.update(
             {'Contact Emails': '',
@@ -3436,7 +3524,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': ''})
+             'Participation Type': '',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(admin_csv,
                          [expected_abc_admin, expected_staff_admin])
         reg_session.check_open_relative('country3?@template=prereg')
@@ -3492,7 +3584,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': ''})
+             'Participation Type': '',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         expected_staff_admin = expected_staff.copy()
         expected_staff_admin.update(
             {'Contact Emails': '',
@@ -3507,7 +3603,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': ''})
+             'Participation Type': '',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(admin_csv,
                          [expected_abc_admin, expected_staff_admin])
         reg_session.check_open_relative('country3?@template=prereg')
@@ -3598,7 +3698,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_staff])
         self.assertEqual(admin_csv, [expected_staff_admin])
         admin_session.create_country_generic()
@@ -3624,7 +3728,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'in-person'})
+             'Participation Type': 'in-person',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_abc, expected_staff])
         self.assertEqual(admin_csv, [expected_abc_admin, expected_staff_admin])
         self.assertEqual(reg_csv, [expected_abc, expected_staff])
@@ -3678,6 +3786,26 @@ class RegSystemTestCase(unittest.TestCase):
         self.assertEqual(anon_csv, [expected_abc, expected_staff])
         self.assertEqual(admin_csv, [expected_abc_admin, expected_staff_admin])
         self.assertEqual(reg_csv, [expected_abc, expected_staff])
+        # Test editing future contact details.
+        reg_session.edit_prereg(
+            '3',
+            {'future_contact_organisation': 'ABC Org',
+             'future_contact_1_public': 'yes',
+             'future_contact_email_1': 'first@email.invalid',
+             'future_contact_email_3': 'some@email.invalid',
+             'future_contact_name_3': 'Some Name'},
+            mail=True)
+        anon_csv = session.get_countries_csv()
+        admin_csv = admin_session.get_countries_csv()
+        reg_csv = reg_session.get_countries_csv()
+        expected_abc_admin.update(
+            {'Future Contact Organisation': 'ABC Org',
+             'Future Contact 1 Public': 'Yes',
+             'Future Contact Emails': 'first@email.invalid,some@email.invalid',
+             'Future Contact Names': ',Some Name'})
+        self.assertEqual(anon_csv, [expected_abc, expected_staff])
+        self.assertEqual(admin_csv, [expected_abc_admin, expected_staff_admin])
+        self.assertEqual(reg_csv, [expected_abc, expected_staff])
         # This data can be edited even when preregistration is disabled.
         admin_session.edit('event', '1', {'preregistration_enabled': 'no'})
         reg_session.edit_prereg('3',
@@ -3688,6 +3816,25 @@ class RegSystemTestCase(unittest.TestCase):
         reg_csv = reg_session.get_countries_csv()
         expected_abc_admin.update(
             {'Leader Email': 'gets-papers2@example.invalid'})
+        self.assertEqual(anon_csv, [expected_abc, expected_staff])
+        self.assertEqual(admin_csv, [expected_abc_admin, expected_staff_admin])
+        self.assertEqual(reg_csv, [expected_abc, expected_staff])
+        reg_session.edit_prereg(
+            '3',
+            {'future_contact_organisation': 'ABC Org 2',
+             'future_contact_1_public': 'no',
+             'future_contact_email_1': 'first@em.invalid',
+             'future_contact_email_3': 'some@em.invalid',
+             'future_contact_name_3': 'Other Name'},
+            mail=True)
+        anon_csv = session.get_countries_csv()
+        admin_csv = admin_session.get_countries_csv()
+        reg_csv = reg_session.get_countries_csv()
+        expected_abc_admin.update(
+            {'Future Contact Organisation': 'ABC Org 2',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': 'first@em.invalid,some@em.invalid',
+             'Future Contact Names': ',Other Name'})
         self.assertEqual(anon_csv, [expected_abc, expected_staff])
         self.assertEqual(admin_csv, [expected_abc_admin, expected_staff_admin])
         self.assertEqual(reg_csv, [expected_abc, expected_staff])
@@ -3719,7 +3866,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'virtual'})
+             'Participation Type': 'virtual',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_staff])
         self.assertEqual(admin_csv, [expected_staff_admin])
         admin_session.create_country_generic()
@@ -3745,7 +3896,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': 'virtual'})
+             'Participation Type': 'virtual',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_abc, expected_staff])
         self.assertEqual(admin_csv, [expected_abc_admin, expected_staff_admin])
         self.assertEqual(reg_csv, [expected_abc, expected_staff])
@@ -3802,7 +3957,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': ''})
+             'Participation Type': '',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_staff])
         self.assertEqual(admin_csv, [expected_staff_admin])
         admin_session.create_country_generic()
@@ -3828,7 +3987,11 @@ class RegSystemTestCase(unittest.TestCase):
              'Billing Address': '',
              'Leader Email': '',
              'Physical Address': '',
-             'Participation Type': ''})
+             'Participation Type': '',
+             'Future Contact Organisation': '',
+             'Future Contact 1 Public': 'No',
+             'Future Contact Emails': '',
+             'Future Contact Names': ''})
         self.assertEqual(anon_csv, [expected_abc, expected_staff])
         self.assertEqual(admin_csv, [expected_abc_admin, expected_staff_admin])
         self.assertEqual(reg_csv, [expected_abc, expected_staff])
@@ -3974,6 +4137,36 @@ class RegSystemTestCase(unittest.TestCase):
                                     expected_jkl, expected_staff])
         self.assertEqual(admin_csv, [expected_abc, expected_def, expected_ghi,
                                      expected_jkl, expected_staff])
+        # Test contact details from bulk registration.
+        csv_in = [{'Name': 'Test Fifth Country',
+                   'Code': 'MNO',
+                   'Contact Organisation': 'Some Org',
+                   'Contact 1 Public': 'Yes',
+                   'Contact Email 1': 'MNO1@example.invalid',
+                   'Contact Name 1': 'Name One',
+                   'Contact Email 2': 'MNO2@example.invalid',
+                   'Contact Name 2': 'Name Two',
+                   'Contact Email 3': 'MNO3@example.invalid'}]
+        csv_filename = self.gen_test_csv_no_trailing_empty(
+            csv_in,
+            ['Name', 'Code', 'Contact Organisation', 'Contact 1 Public',
+             'Contact Email 1', 'Contact Name 1', 'Contact Email 2',
+             'Contact Name 2', 'Contact Email 3'])
+        admin_session.check_open_relative('country?@template=bulkregister')
+        admin_session.select_main_form()
+        admin_session.set({'csv_file': csv_filename})
+        admin_session.check_submit_selected()
+        admin_session.select_main_form()
+        admin_session.check_submit_selected(mail=True)
+        admin_csv = admin_session.get_countries_csv()
+        self.assertEqual(admin_csv[4]['Future Contact Organisation'],
+                         'Some Org')
+        self.assertEqual(admin_csv[4]['Future Contact 1 Public'], 'Yes')
+        self.assertEqual(admin_csv[4]['Future Contact Emails'],
+                         'MNO1@example.invalid,MNO2@example.invalid,'
+                         'MNO3@example.invalid')
+        self.assertEqual(admin_csv[4]['Future Contact Names'],
+                         'Name One,Name Two,')
 
     @_with_config(distinguish_official='Yes')
     def test_country_bulk_register_official(self):
