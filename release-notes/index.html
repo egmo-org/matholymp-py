@@ -126,6 +126,20 @@ registration system has a new configuration variable
 <li><p>The primary source for the software is now <a class="reference external" href="https://github.com/egmo-org/matholymp-py">on GitHub</a>.</p></li>
 <li><p>Document generation now uses <a class="reference external" href="https://github.com/py-pdf/pypdf">pypdf</a> (version 3.1.0 or later) rather
 than the older PyPDF2.</p></li>
+<li><p>The registration system now supports collecting additional contact
+information for countries, intended for use for future events: the
+name of a contact organization, some number of pairs of contact name
+and email address, and whether the first contact name and email
+address should be public (if the event maintains a public contact
+list).  <code class="file docutils literal notranslate"><span class="pre">country.item.html</span></code>, <code class="file docutils literal notranslate"><span class="pre">country.bulkregister.html</span></code>
+and <code class="file docutils literal notranslate"><span class="pre">country.prereg.html</span></code> are changed; there is a new
+configuration variable <cite>matholymp_num_future_contacts</cite>, and a new
+template file <code class="file docutils literal notranslate"><span class="pre">extensions/email-template-future-contact</span></code>.
+Note that there is currently no automation for maintaining the
+contact list between events or for producing the public contact
+list, although changes to those registration details are emailed to
+the registration system contact address (<cite>admin_email</cite> from
+<code class="file docutils literal notranslate"><span class="pre">config.ini</span></code>) to enable them to update such a list manually.</p></li>
 </ul>
 </section>
 <section id="version-2020-07-0-22-july-2020">

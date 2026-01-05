@@ -143,6 +143,21 @@ Next version (unreleased)
   <https://github.com/py-pdf/pypdf>`_ (version 3.1.0 or later) rather
   than the older PyPDF2.
 
+* The registration system now supports collecting additional contact
+  information for countries, intended for use for future events: the
+  name of a contact organization, some number of pairs of contact name
+  and email address, and whether the first contact name and email
+  address should be public (if the event maintains a public contact
+  list).  :file:`country.item.html`, :file:`country.bulkregister.html`
+  and :file:`country.prereg.html` are changed; there is a new
+  configuration variable `matholymp_num_future_contacts`, and a new
+  template file :file:`extensions/email-template-future-contact`.
+  Note that there is currently no automation for maintaining the
+  contact list between events or for producing the public contact
+  list, although changes to those registration details are emailed to
+  the registration system contact address (`admin_email` from
+  :file:`config.ini`) to enable them to update such a list manually.
+
 Version 2020.07.0 (22 July 2020)
 --------------------------------
 
