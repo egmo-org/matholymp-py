@@ -549,6 +549,12 @@ def show_bulk_csv_country(db, form):
         official_desc = db.config.ext['MATHOLYMP_OFFICIAL_DESC']
         columns.append(official_desc)
     columns.append('Contact Emails')
+    columns.append('Contact Organisation')
+    columns.append('Contact 1 Public')
+    contact_nos = get_future_contact_numbers(db)
+    for n in contact_nos:
+        columns.append('Contact Email %d' % n)
+        columns.append('Contact Name %d' % n)
     head_row_list = [sitegen.html_tr_th_list(columns)]
     body_row_list = []
     for csv_row in file_data:
@@ -571,6 +577,13 @@ def show_bulk_csv_country(db, form):
             out_row.append(html.escape(csv_row.get(official_desc, '')))
         contact_emails = bulk_csv_contact_emails(csv_row)
         out_row.append(html.escape(', '.join(contact_emails)))
+        out_row.append(html.escape(csv_row.get('Contact Organisation', '')))
+        out_row.append(html.escape(csv_row.get('Contact 1 Public', '')))
+        for n in contact_nos:
+            out_row.append(html.escape(csv_row.get(
+                'Contact Email %d' % n, '')))
+            out_row.append(html.escape(csv_row.get(
+                'Contact Name %d' % n, '')))
         body_row_list.append(sitegen.html_tr_td_list(out_row))
     return sitegen.html_table_thead_tbody_list(head_row_list, body_row_list)
 
