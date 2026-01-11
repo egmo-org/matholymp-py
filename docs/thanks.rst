@@ -78,6 +78,8 @@ limited to:
 
 * Dan Schwarz
 
+* Pārsla Esmeralda Sietiņa
+  
 * Geoff Smith
 
 * Okan Tekman
