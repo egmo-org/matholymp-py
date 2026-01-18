@@ -153,7 +153,9 @@ class DocumentGenerator:
         """Substitute values from a dictionary in a LaTeX template file.
         Return the LaTeX program to use."""
         template_text = read_text_from_file(template_file_name)
-        latex_prog = 'xelatex' if 'xelatex' in template_text else 'pdflatex'
+        latex_prog = ('lualatex' if 'lualatex' in template_text
+                      else 'xelatex' if 'xelatex' in template_text
+                      else 'pdflatex')
         output_text = self.subst_values_in_template_text(template_text, data,
                                                          raw_fields)
         write_text_to_file(output_text, output_file_name)

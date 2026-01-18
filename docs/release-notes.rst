@@ -116,10 +116,11 @@ Next version (unreleased)
   :file:`person.item.html`, :file:`person.scoreboard.html` and
   :file:`person.scoredisplay.html` are changed.
 
-* Document generation now supports using :command:`xelatex` as an
-  alternative to :command:`pdflatex`.  If a template source file has a
-  comment mentioning ``xelatex``, that program will be used to compile
-  documents using that template.
+* Document generation now supports using :command:`lualatex` or
+  :command:`xelatex` as an alternative to :command:`pdflatex`.  If a
+  template source file has a comment mentioning ``lualatex`` or
+  ``xelatex``, that program will be used to compile documents using
+  that template.
 
 * Automated testing of the registration system now supports and
   requires MechanicalSoup version 1.3.0 or later.
