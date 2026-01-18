@@ -72,6 +72,11 @@ matholymp:
   is used or not; not needed if those parts of matholymp are not
   used).
 
+* `python-qrcode <https://github.com/lincolnloop/python-qrcode>`_
+  (used in generating cover sheets for automatic processing of scans
+  of scripts; needed if document generation or the registration system
+  are used).
+
 * `Pillow <https://python-pillow.org/>`_, built with support for JPEG
   and PNG files.
 

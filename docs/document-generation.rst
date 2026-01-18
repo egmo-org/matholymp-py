@@ -258,6 +258,20 @@ adapting if you have more than four contestants per team)::
 Add ``--background`` if a background design is to be used in the
 forms, but they are not printed on paper with that design pre-printed.
 
+Cover sheets
+^^^^^^^^^^^^
+
+To generate cover sheets for use in scanning scripts (so many scripts
+can be scanned together and the resulting PDF split up
+automatically)::
+
+   mo-document-generate cover-sheet all
+
+The file pointed to by ``cover_sheet_key_file`` should exist before
+this command is run, with 20 bytes of random data (generated afresh
+for each year's event); that configuration variable may be a path
+relative to the document generation directory, or an absolute path.
+
 Certificates
 ^^^^^^^^^^^^
 

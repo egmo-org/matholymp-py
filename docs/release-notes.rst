@@ -136,6 +136,12 @@ Next version (unreleased)
   ``matholymp_num_exams``.  New files :file:`script.index.html`,
   :file:`script.item.html` and :file:`script.manage.html` are added;
   :file:`page.html` and :file:`person.item.html` are changed.
+  Document generation has new configuration variables
+  ``cover_sheet_key_file`` and ``problems_per_exam``.  Document
+  generation now requires `python-qrcode
+  <https://github.com/lincolnloop/python-qrcode>`_ (and thus that is
+  also required when using the registration system since that imports
+  the document generation code).
 
 * The primary source for the software is now `on GitHub
   <https://github.com/egmo-org/matholymp-py>`_.

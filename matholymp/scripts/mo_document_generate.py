@@ -37,10 +37,11 @@ directories from unpacking the corresponding .zip files, and generates
 output in an out/ subdirectory, unless options are used to select
 other directories.  The known types of document are 'badge',
 'invitation-letter', 'desk-label', 'award-certificate',
-'participation-certificate', 'paper', 'language-list', 'coord-form'
-and 'scores-commands'.  The identifiers passed along with document
-types vary; any identifier may be used for document types that do not
-depend on such an identifier, and 'all' is suitable for most cases.
+'participation-certificate', 'paper', 'language-list', 'coord-form',
+'cover-sheet' and 'scores-commands'.  The identifiers passed along
+with document types vary; any identifier may be used for document
+types that do not depend on such an identifier, and 'all' is suitable
+for most cases.
 """
 
 import argparse
@@ -129,6 +130,8 @@ def main():
         docgen.generate_language_list()
     elif cmdline_data['type'] == 'coord-form':
         docgen.generate_coord_forms(bg)
+    elif cmdline_data['type'] == 'cover-sheet':
+        docgen.generate_cover_sheets(gen_id, cmdline_data['day'], exam_order)
     elif cmdline_data['type'] == 'scores-commands':
         docgen.generate_scores_commands()
     else:

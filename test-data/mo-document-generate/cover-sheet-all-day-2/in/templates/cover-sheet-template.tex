@@ -1,0 +1,39 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[a4paper,left=2cm,right=2cm,bottom=2cm,top=6cm]{geometry}
+\usepackage{graphicx}
+\pagestyle{empty}
+\newcommand{\problemcoversheet}[3]{%
+\begin{center}%
+\Huge \textsf{@@short_name@@ @@year@@}%
+\end{center}%
+\begin{center}%
+\Huge \textsf{#1 Problem #2}%
+\end{center}%
+\begin{center}%
+\Large \textsf{Number of pages \\ (excluding this one):}%
+\end{center}%
+\vspace{4cm}%
+\begin{center}%
+\includegraphics[width=5cm]{#3}%
+\end{center}%
+\clearpage%
+}
+\newcommand{\scratchcoversheet}[3]{%
+\begin{center}%
+\Huge \textsf{@@short_name@@ @@year@@}%
+\end{center}%
+\begin{center}%
+\Huge \textsf{#1 Scratch Day #2}%
+\end{center}%
+\begin{center}%
+\Large \textsf{Number of pages \\ (excluding this one):}%
+\end{center}%
+\vspace{4cm}%
+\begin{center}%
+\includegraphics[width=5cm]{#3}%
+\end{center}%
+\clearpage%
+}
+\begin{document}
+@@cover_sheets@@%
+\end{document}

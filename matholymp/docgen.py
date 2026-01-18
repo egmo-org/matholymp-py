@@ -32,7 +32,9 @@ This module provides the DocumentGenerator class that can be used to
 generate various documents from registration system data.
 """
 
+import base64
 import filecmp
+import hmac
 import os
 import os.path
 import re
@@ -40,6 +42,7 @@ import shutil
 import subprocess
 
 from pypdf import PdfReader
+import qrcode
 
 from matholymp.collate import coll_get_sort_key
 from matholymp.datetimeutil import date_to_name
@@ -55,7 +58,8 @@ def read_docgen_config(top_directory):
     """Read the configuration file for document generation."""
     config_file_name = os.path.join(top_directory, 'documentgen.cfg')
     cfg_str_keys = ['year', 'short_name', 'long_name', 'num_key',
-                    'marks_per_problem', 'badge_phone_desc',
+                    'problems_per_exam', 'marks_per_problem',
+                    'cover_sheet_key_file', 'badge_phone_desc',
                     'badge_event_phone', 'badge_emergency_phone',
                     'badge_event_ordinal', 'badge_event_venue',
                     'badge_event_dates']
@@ -69,6 +73,8 @@ def read_docgen_config(top_directory):
     config_data = read_config(config_file_name, 'matholymp.documentgen',
                               cfg_str_keys, cfg_int_keys,
                               cfg_int_none_keys, cfg_bool_keys)
+    config_data['cover_sheet_key_file'] = os.path.join(
+        top_directory, config_data['cover_sheet_key_file'])
     return config_data
 
 
@@ -941,6 +947,92 @@ class DocumentGenerator:
         raw_fields = ['coord_forms']
         self.subst_and_pdflatex(template_file_base, output_file_base,
                                 template_fields, raw_fields)
+
+    def generate_cover_sheet_qrcode(self, key, filename, text):
+        """Generate a QR code for a cover sheet."""
+        # The use of HMAC ensures (provided a unique secret key is
+        # used for each event) that cover sheets cannot be faked by
+        # contestants and nor can a cover sheet from a different event
+        # be wrongly interpreted as one for this event.
+        mac = base64.b32encode(hmac.digest(
+            key, text.encode('utf-8'), 'sha1')).decode('utf-8')
+        full_text = '%s %s' % (text, mac)
+        code = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H,
+                             box_size=1)
+        code.add_data(full_text)
+        img = code.make_image()
+        filename = os.path.join(self._out_dir, filename)
+        make_dirs_for_file(filename)
+        img.save(filename)
+
+    def generate_cover_sheets(self, person_id, day_opt, exam_order):
+        """Generate all cover sheets requested by the command line."""
+        template_file_base = 'cover-sheet-template'
+
+        with open(self._cfg['cover_sheet_key_file'], 'rb') as key_file:
+            key = key_file.read()
+
+        problems_per_exam = [int(i)
+                             for i in self._cfg['problems_per_exam'].split()]
+        problem_ranges = []
+        num_problems_before = 0
+        for i in range(self._event.num_exams):
+            problem_ranges.append(list(range(
+                num_problems_before + 1,
+                num_problems_before + 1 + problems_per_exam[i])))
+            num_problems_before += problems_per_exam[i]
+
+        if day_opt:
+            days = [int(day_opt) - 1]
+        else:
+            days = list(range(self._event.num_exams))
+
+        if person_id == 'all':
+            output_file_base = 'cover-sheets'
+            contestants = [c for c in self._event.contestant_list
+                           if not c.remote_participant]
+            if exam_order is None:
+                contestants = sorted(contestants,
+                                     key=lambda x: x.sort_key_exams)
+            else:
+                contestants = sorted(
+                    contestants,
+                    key=lambda x: exam_order[x.contestant_code])
+            output_file_base = 'cover-sheets'
+        else:
+            output_file_base = 'cover-sheet-person' + person_id
+            p = self.get_contestant_by_id(person_id)
+            contestants = [p]
+
+        for d in days:
+            d_norm = d + 1
+            output_file_day = output_file_base
+            if self._event.num_exams != 1:
+                output_file_day += '-day%d' % d_norm
+            cover_sheet_list = []
+            for p in contestants:
+                for n in problem_ranges[d]:
+                    enc_text = '%d P%d' % (p.person.id, n)
+                    filename = 'qr-%d-p%d.png' % (p.person.id, n)
+                    self.generate_cover_sheet_qrcode(key, filename, enc_text)
+                    cover_sheet_list.append(
+                        '\\problemcoversheet{%s}{%s}{%s}'
+                        % (self.text_to_latex(p.contestant_code), n, filename))
+                enc_text = '%d D%d' % (p.person.id, d_norm)
+                filename = 'qr-%d-d%d.png' % (p.person.id, d_norm)
+                self.generate_cover_sheet_qrcode(key, filename, enc_text)
+                cover_sheet_list.append(
+                    '\\scratchcoversheet{%s}{%s}{%s}'
+                    % (self.text_to_latex(p.contestant_code), d_norm,
+                       filename))
+            cover_sheet_text = '%\n'.join(cover_sheet_list)
+            template_fields = {}
+            template_fields['year'] = self._event.year
+            template_fields['short_name'] = self._event.short_name
+            template_fields['cover_sheets'] = cover_sheet_text
+            raw_fields = ['cover_sheets']
+            self.subst_and_pdflatex(template_file_base, output_file_day,
+                                    template_fields, raw_fields)
 
     def generate_scores_commands(self):
         """Generate commands to upload scores in bulk."""
