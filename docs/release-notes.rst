@@ -120,7 +120,7 @@ Next version (unreleased)
   :command:`xelatex` as an alternative to :command:`pdflatex`.  If a
   template source file has a comment mentioning ``lualatex`` or
   ``xelatex``, that program will be used to compile documents using
-  that template.
+  that template; the same applies to source files for papers.
 
 * Automated testing of the registration system now supports and
   requires MechanicalSoup version 1.3.0 or later.

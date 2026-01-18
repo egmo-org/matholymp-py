@@ -148,14 +148,18 @@ class DocumentGenerator:
                              template_text)
         return output_text
 
+    def latex_prog_from_text(self, text):
+        """Return the LaTeX program to use for building given text."""
+        return ('lualatex' if 'lualatex' in text
+                else 'xelatex' if 'xelatex' in text
+                else 'pdflatex')
+
     def subst_values_in_template_file(self, template_file_name,
                                       output_file_name, data, raw_fields):
         """Substitute values from a dictionary in a LaTeX template file.
         Return the LaTeX program to use."""
         template_text = read_text_from_file(template_file_name)
-        latex_prog = ('lualatex' if 'lualatex' in template_text
-                      else 'xelatex' if 'xelatex' in template_text
-                      else 'pdflatex')
+        latex_prog = self.latex_prog_from_text(template_text)
         output_text = self.subst_values_in_template_text(template_text, data,
                                                          raw_fields)
         write_text_to_file(output_text, output_file_name)
@@ -572,7 +576,9 @@ class DocumentGenerator:
         remove_if_exists(cache_pdf_name)
         remove_if_exists(cache_tex_name)
         make_dirs_for_file(cache_pdf_name)
-        self.pdflatex_file(tex_file_name)
+        tex_text = read_text_from_file(papers_dir_tex_name)
+        latex_prog = self.latex_prog_from_text(tex_text)
+        self.pdflatex_file(tex_file_name, latex_prog=latex_prog)
         self.pdflatex_cleanup(os.path.join(self._out_dir, lang_filename_day))
         make_dirs_for_file(cache_tex_name)
         shutil.copyfile(papers_dir_tex_name, cache_tex_name)
