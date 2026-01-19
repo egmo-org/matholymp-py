@@ -580,6 +580,7 @@ def init_schema(env):
     # linked to a contestant, not any older ones that might e.g. have
     # been wrongly linked and then replaced).
     db.security.addRole(name='Scan', description='Managing script scans')
+    db.security.addPermissionToRole('Scan', 'Rest Access')
     p = db.security.addPermission(name='Edit', klass='person',
                                   properties=script_scan_props)
     db.security.addPermissionToRole('Scan', p)
