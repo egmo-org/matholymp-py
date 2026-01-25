@@ -55,6 +55,7 @@ Contents:
    static-site
    online-registration
    document-generation
+   scan-processing
    contributing
    release-notes
    copying

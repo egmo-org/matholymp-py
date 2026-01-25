@@ -141,7 +141,9 @@ Next version (unreleased)
   generation now requires `python-qrcode
   <https://github.com/lincolnloop/python-qrcode>`_ (and thus that is
   also required when using the registration system since that imports
-  the document generation code).
+  the document generation code).  The new
+  :command:`mo-process-script-scans` script has several other
+  dependencies.
 
 * The primary source for the software is now `on GitHub
   <https://github.com/egmo-org/matholymp-py>`_.

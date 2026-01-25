@@ -80,6 +80,20 @@ matholymp:
 * `Pillow <https://python-pillow.org/>`_, built with support for JPEG
   and PNG files.
 
+* `Requests <https://requests.readthedocs.io/en/latest/>`_ (used for
+  automatic uploading of scripts to the registration system based on
+  barcoded cover sheets).
+
+* `poppler <https://poppler.freedesktop.org/>`_; specifically, the
+  :command:`pdftoppm` command (used for automatic processing of
+  scripts based on barcoded cover sheets).
+
+* `ImageMagick <https://imagemagick.org/>` (used for automatic
+  processing of scripts based on barcoded cover sheets).
+
+* `ZBar <https://github.com/mchehab/zbar>` (used for automatic
+  processing of scripts based on barcoded cover sheets).
+
 * `LaTeX <https://www.latex-project.org/>`_; specifically, the
   :command:`pdflatex` command (used in generating PDF documents from
   registration system data; not needed if that part of matholymp is
@@ -179,7 +193,7 @@ these modules can be found when the Roundup registration system is run
 appropriately).  Some parts of the matholymp code have a testsuite,
 which can be run with :command:`mo-run-tests`; all tests should pass.
 
-The matholymp functionality falls into three main areas.  Although the
+The matholymp functionality falls into four main areas.  Although the
 software is designed as an integrated whole, you can also choose to
 use only parts of the functionality.  Whichever parts of the system
 you use, you will be maintaining directories containing configuration
@@ -196,3 +210,4 @@ up the raw files containing the database).
 * :ref:`static-site`.
 * :ref:`online-registration`.
 * :ref:`document-generation`.
+* :ref:`scan-processing`.

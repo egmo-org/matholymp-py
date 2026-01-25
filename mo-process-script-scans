@@ -1,6 +1,6 @@
-# Initialise matholymp.scripts subpackage.
+#! /usr/bin/env python3
 
-# Copyright 2014-2026 Joseph Samuel Myers.
+# Copyright 2026 Joseph Samuel Myers.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,11 +27,8 @@
 # combination shall include the source code for the parts of OpenSSL
 # used as well as that of the covered work.
 
-"""
-The matholymp.scripts package contains the main functions providing
-the user interface to command-line scripts.
-"""
+"""mo-process-script-scans script wrapper."""
 
-__all__ = ['mo_document_generate', 'mo_process_script_scans', 'mo_run_tests',
-           'mo_sphinx_build', 'mo_static_generate', 'mo_static_import',
-           'mo_static_papers_import', 'mo_static_upgrade']
+import matholymp.scripts.mo_process_script_scans
+
+matholymp.scripts.mo_process_script_scans.main()

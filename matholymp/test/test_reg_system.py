@@ -48,6 +48,8 @@ import traceback
 import unittest
 import zipfile
 
+from pypdf import PdfReader, PdfWriter
+
 try:
     import mechanicalsoup
     from PIL import Image
@@ -119,6 +121,17 @@ def gen_pdf_file(dirname, suffix):
     if ret_file != pdf_file:
         os.rename(pdf_file, ret_file)
     return ret_file
+
+
+def run_script(dirname, script, args):
+    """Run a matholymp script."""
+    mod_dir = os.path.dirname(os.path.abspath(__file__))
+    top_dir = os.path.dirname(os.path.dirname(mod_dir))
+    script = os.path.join(top_dir, script)
+    args = [script] + args
+    subprocess.run(args, cwd=dirname,
+                   stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                   stderr=subprocess.DEVNULL, check=True)
 
 
 class RoundupTestInstance:
@@ -205,6 +218,19 @@ class RoundupTestInstance:
             # need to create one.
             self.docgen_badge_background_pdf = os.path.join(
                 self.docgen_dir, 'templates', 'lanyard-generic.pdf')
+            # Create an empty key for cover sheet generation, and
+            # empty directories used if mo-document-generate is called
+            # directly.
+            with open(os.path.join(self.docgen_dir, 'cover-sheet-key'),
+                      'wb') as f:
+                pass
+            self.docgen_data_dir = os.path.join(self.docgen_dir, 'data')
+            os.makedirs(self.docgen_data_dir)
+            self.docgen_out_dir = os.path.join(self.docgen_dir, 'out')
+            os.makedirs(self.docgen_out_dir)
+        self.scans_example_dir = os.path.join(top_dir, 'examples',
+                                              'scan-processing')
+        self.scans_cfg = os.path.join(self.instance_dir, 'scans.cfg')
         os.makedirs(os.path.join(self.instance_dir, 'db'))
         self.passwords = {'admin': roundup.password.generatePassword()}
         self.userids = {'admin': '1'}
@@ -347,6 +373,24 @@ class RoundupTestInstance:
         with open(os.path.join(self.static_site_dir, filename),
                   'rb') as in_file:
             return in_file.read()
+
+    def setup_scans_cfg(self, user):
+        """Set up scans.cfg for automatic scan uploading."""
+        shutil.copy(os.path.join(self.scans_example_dir, 'scans.cfg'),
+                    self.scans_cfg)
+        replace_text_in_file(
+            self.scans_cfg,
+            '\nbase_url = https://www.example.org/registration/2015/\n',
+            '\nbase_url = %s\n' % self.url)
+        replace_text_in_file(
+            self.scans_cfg,
+            '\nuser = scans\n',
+            '\nuser = %s\n' % user)
+        with open(os.path.join(self.instance_dir, 'cover-sheet-key'),
+                  'wb'):
+            pass
+        write_text_to_file('%s\n' % self.passwords[user],
+                           os.path.join(self.instance_dir, 'scans-password'))
 
 
 class RoundupTestSession:
@@ -528,6 +572,23 @@ class RoundupTestSession:
         return self.get_download_csv('person?@action=people_csv',
                                      'people.csv')
 
+    def get_docgen_csv_inputs(self):
+        """Get the CSV files used by mo-document-generate."""
+        countries_csv = self.get_download_file(
+            'country?@action=country_csv',
+            'text/csv; charset=UTF-8',
+            'countries.csv')
+        shutil.copy(countries_csv,
+                    os.path.join(self.instance.docgen_data_dir,
+                                 'countries.csv'))
+        people_csv = self.get_download_file(
+            'person?@action=people_csv',
+            'text/csv; charset=UTF-8',
+            'people.csv')
+        shutil.copy(people_csv,
+                    os.path.join(self.instance.docgen_data_dir,
+                                 'people.csv'))
+
     def get_scores_csv(self):
         """Get the CSV file of scores."""
         return self.get_download_csv('person?@action=scores_csv',
@@ -701,6 +762,10 @@ class RoundupTestSession:
     def create_viewscores_user(self):
         """Create a user who can view hidden scores."""
         self.create_user('viewscores', 'XMO 2015 Staff', 'User,ViewScores')
+
+    def create_scans_user(self):
+        """Create a scans-managing user."""
+        self.create_user('scans', 'XMO 2015 Staff', 'User,Scan')
 
     def create_country(self, code, name, other=None, error=False):
         """Create a country and corresponding user account."""
@@ -8534,6 +8599,52 @@ class RegSystemTestCase(unittest.TestCase):
                         admin_csv[0]['Script Scan P1 URL'],
                         'Generic Number': admin_csv[0]['Generic Number']}
         self.assertEqual(admin_csv, [expected])
+
+    @_with_config(docgen_directory='docgen')
+    def test_person_script_barcode(self):
+        """
+        Test processing of scripts using barcoded cover sheets.
+        """
+        admin_session = self.get_session('admin')
+        gen_pdfs = []
+        for i in range(4):
+            sc_filename, _ = self.gen_test_pdf()
+            gen_pdfs.append(sc_filename)
+        admin_session.create_country_generic()
+        admin_session.create_person('Test First Country', 'Contestant 1')
+        admin_session.create_scans_user()
+        admin_session.instance.setup_scans_cfg('scans')
+        admin_session.get_docgen_csv_inputs()
+        run_script(self.instance.docgen_dir, 'mo-document-generate',
+                   ['--day', '1', 'cover-sheet', 'all'])
+        cover_sheets = PdfReader(os.path.join(self.instance.docgen_out_dir,
+                                              'cover-sheets-day1.pdf'))
+        self.assertEqual(len(cover_sheets.pages), 4)
+        out_pdf = PdfWriter()
+        for i in range(4):
+            out_pdf.append(cover_sheets, pages=(i, i + 1))
+            out_pdf.append(gen_pdfs[i])
+        out_filename = os.path.join(self.instance.docgen_out_dir,
+                                    'combined.pdf')
+        out_pdf.write(out_filename)
+        run_script(self.instance.instance_dir, 'mo-process-script-scans',
+                   [out_filename])
+        admin_csv = admin_session.get_people_csv()
+        # This doesn't test the contents of the extracted scans, just
+        # that the correct problems had a scan stored for them (and in
+        # the expected order).
+        self.assertEqual(admin_csv[0]['Script Scan P1 URL'],
+                         self.instance.url + 'script1/scan.pdf')
+        self.assertEqual(admin_csv[0]['Script Scan P2 URL'],
+                         self.instance.url + 'script2/scan.pdf')
+        self.assertEqual(admin_csv[0]['Script Scan P3 URL'],
+                         self.instance.url + 'script3/scan.pdf')
+        self.assertEqual(admin_csv[0]['Scratch Scan Day 1 URL'],
+                         self.instance.url + 'script4/scan.pdf')
+        self.assertEqual(admin_csv[0]['Script Scan P4 URL'], '')
+        self.assertEqual(admin_csv[0]['Script Scan P5 URL'], '')
+        self.assertEqual(admin_csv[0]['Script Scan P6 URL'], '')
+        self.assertEqual(admin_csv[0]['Scratch Scan Day 2 URL'], '')
 
     def test_person_retire(self):
         """

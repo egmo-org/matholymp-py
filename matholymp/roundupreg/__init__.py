@@ -33,6 +33,6 @@ based on Roundup.
 """
 
 __all__ = ['actions', 'auditors', 'auditorutil', 'bulkreg', 'cache', 'config',
-           'initial_data', 'lockfile', 'reactors', 'roundupemail',
+           'initial_data', 'lockfile', 'reactors', 'rest', 'roundupemail',
            'roundupsitegen', 'roundupsource', 'rounduputil', 'schema',
            'staticsite', 'templating', 'userauditor']
