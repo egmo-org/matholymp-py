@@ -13,7 +13,7 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex/" />
     <link rel="search" title="Search" href="../search/" />
-    <link rel="next" title="Contributing to matholymp" href="../contributing/" />
+    <link rel="next" title="Scan processing" href="../scan-processing/" />
     <link rel="prev" title="Online registration" href="../online-registration/" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -236,6 +236,19 @@ adapting if you have more than four contestants per team):</p>
 <p>Add <code class="docutils literal notranslate"><span class="pre">--background</span></code> if a background design is to be used in the
 forms, but they are not printed on paper with that design pre-printed.</p>
 </section>
+<section id="cover-sheets">
+<h3>Cover sheets<a class="headerlink" href="#cover-sheets" title="Link to this heading">¶</a></h3>
+<p>To generate cover sheets for use in scanning scripts (so many scripts
+can be scanned together and the resulting PDF split up
+automatically):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mo</span><span class="o">-</span><span class="n">document</span><span class="o">-</span><span class="n">generate</span> <span class="n">cover</span><span class="o">-</span><span class="n">sheet</span> <span class="nb">all</span>
+</pre></div>
+</div>
+<p>The file pointed to by <code class="docutils literal notranslate"><span class="pre">cover_sheet_key_file</span></code> should exist before
+this command is run, with 20 bytes of random data (generated afresh
+for each year’s event); that configuration variable may be a path
+relative to the document generation directory, or an absolute path.</p>
+</section>
 <section id="certificates">
 <h3>Certificates<a class="headerlink" href="#certificates" title="Link to this heading">¶</a></h3>
 <p>If generating certificates for awards, <code class="file docutils literal notranslate"><span class="pre">people.csv</span></code> needs to
@@ -300,6 +313,7 @@ the registration system, as the user running that system, then do:</p>
 <li class="toctree-l2"><a class="reference internal" href="#document-generation-tasks">Document generation tasks</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../scan-processing/">Scan processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/">Contributing to matholymp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release-notes/">Release notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../copying/">Copyright and license</a></li>
@@ -312,7 +326,7 @@ the registration system, as the user running that system, then do:</p>
 <ul>
   <li><a href="../">Documentation overview</a><ul>
       <li>Previous: <a href="../online-registration/" title="previous chapter">Online registration</a></li>
-      <li>Next: <a href="../contributing/" title="next chapter">Contributing to matholymp</a></li>
+      <li>Next: <a href="../scan-processing/" title="next chapter">Scan processing</a></li>
   </ul></li>
 </ul>
 </div>

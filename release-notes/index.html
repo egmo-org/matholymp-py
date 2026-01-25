@@ -123,7 +123,14 @@ later, and requires 1.7.0 or later.</p></li>
 registration system has a new configuration variable
 <code class="docutils literal notranslate"><span class="pre">matholymp_num_exams</span></code>.  New files <code class="file docutils literal notranslate"><span class="pre">script.index.html</span></code>,
 <code class="file docutils literal notranslate"><span class="pre">script.item.html</span></code> and <code class="file docutils literal notranslate"><span class="pre">script.manage.html</span></code> are added;
-<code class="file docutils literal notranslate"><span class="pre">page.html</span></code> and <code class="file docutils literal notranslate"><span class="pre">person.item.html</span></code> are changed.</p></li>
+<code class="file docutils literal notranslate"><span class="pre">page.html</span></code> and <code class="file docutils literal notranslate"><span class="pre">person.item.html</span></code> are changed.
+Document generation has new configuration variables
+<code class="docutils literal notranslate"><span class="pre">cover_sheet_key_file</span></code> and <code class="docutils literal notranslate"><span class="pre">problems_per_exam</span></code>.  Document
+generation now requires <a class="reference external" href="https://github.com/lincolnloop/python-qrcode">python-qrcode</a> (and thus that is
+also required when using the registration system since that imports
+the document generation code).  The new
+<strong class="command">mo-process-script-scans</strong> script has several other
+dependencies.</p></li>
 <li><p>The primary source for the software is now <a class="reference external" href="https://github.com/egmo-org/matholymp-py">on GitHub</a>.</p></li>
 <li><p>Document generation now uses <a class="reference external" href="https://github.com/py-pdf/pypdf">pypdf</a> (version 3.1.0 or later) rather
 than the older PyPDF2.</p></li>
@@ -902,6 +909,7 @@ scores.</p></li>
 <li class="toctree-l1"><a class="reference internal" href="../static-site/">Static site generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../online-registration/">Online registration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../document-generation/">Document generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scan-processing/">Scan processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/">Contributing to matholymp</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Release notes</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#next-version-unreleased">Next version (unreleased)</a></li>

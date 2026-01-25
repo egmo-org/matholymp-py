@@ -3,15 +3,18 @@
 <html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; matholymp 2026.01.0.dev0 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Scan processing &#8212; matholymp 2026.01.0.dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
     <script src="../_static/documentation_options.js?v=6222193d"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <link rel="index" title="Index" href="#" />
+    <link rel="index" title="Index" href="../genindex/" />
     <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Contributing to matholymp" href="../contributing/" />
+    <link rel="prev" title="Document generation" href="../document-generation/" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -29,44 +32,28 @@
 
           <div class="body" role="main">
             
-
-<h1 id="index">Index</h1>
-
-<div class="genindex-jumpbox">
- <a href="#E"><strong>E</strong></a>
- | <a href="#P"><strong>P</strong></a>
- 
-</div>
-<h2 id="E">E</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
-    environment variable
-
-      <ul>
-        <li><a href="../intro/#index-0">PYTHONPATH</a>
-</li>
-      </ul></li>
-  </ul></td>
-</tr></table>
-
-<h2 id="P">P</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
-    Python Enhancement Proposals
-
-      <ul>
-        <li><a href="../contributing/#index-0">PEP 8</a>, <a href="../todo/#index-0">[1]</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="../intro/#index-0">PYTHONPATH</a>
-</li>
-  </ul></td>
-</tr></table>
-
+  <section id="scan-processing">
+<span id="id1"></span><h1>Scan processing<a class="headerlink" href="#scan-processing" title="Link to this heading">¶</a></h1>
+<p>Matholymp has some partial support for processing scans of contestant
+scripts, using barcoded cover sheets to support automatically
+splitting up a PDF with scans of multiple scripts.</p>
+<p>Matholymp provides a script <strong class="command">mo-process-script-scans</strong> to do
+this processing.  It expects to be run from a directory containing a
+file <code class="file docutils literal notranslate"><span class="pre">scans.cfg</span></code> with associated configuration information.  The
+<code class="file docutils literal notranslate"><span class="pre">examples/scan-processing/</span></code> directory in the matholymp source
+distribution includes a version of <a class="reference download internal" download="" href="../_downloads/002d888dc70b01ceceda5702697bf27d/scans.cfg"><code class="xref download docutils literal notranslate"><span class="pre">scans.cfg</span></code></a> that may be used as a basis
+for configuring this.  The other arguments are the names of
+multi-script PDFs to process; <strong class="command">mo-process-script-scans</strong>
+creates a corresponding log file for each of those files with <code class="docutils literal notranslate"><span class="pre">.log</span></code>
+appended to its name.</p>
+<p>The file pointed to by <code class="docutils literal notranslate"><span class="pre">cover_sheet_key_file</span></code> should exist before
+this command is run, with the same 20 bytes of random data (generated
+afresh for each year’s event) as in the file used in document
+generation to generate the cover sheets.  The file pointed to by
+<code class="docutils literal notranslate"><span class="pre">password_file</span></code> should also exist, containing the password for the
+registration system account (with the <code class="docutils literal notranslate"><span class="pre">Scan</span></code> role) to be used to
+upload scripts.</p>
+</section>
 
 
           </div>
@@ -85,13 +72,13 @@
 
 
 <h3>Navigation</h3>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../intro/">Introduction, prerequisites and downloads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../roundup-patches/">Roundup patches</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../static-site/">Static site generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../online-registration/">Online registration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../document-generation/">Document generation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../scan-processing/">Scan processing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Scan processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/">Contributing to matholymp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release-notes/">Release notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../copying/">Copyright and license</a></li>
@@ -103,6 +90,8 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../document-generation/" title="previous chapter">Document generation</a></li>
+      <li>Next: <a href="../contributing/" title="next chapter">Contributing to matholymp</a></li>
   </ul></li>
 </ul>
 </div>
@@ -135,6 +124,9 @@
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
+      |
+      <a href="../_sources/scan-processing.rst.txt"
+          rel="nofollow">Page source</a>
     </div>
 
     

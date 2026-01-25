@@ -69,8 +69,22 @@ source distribution before installing Roundup.  See
 also required in the registration system whether document generation
 is used or not; not needed if those parts of matholymp are not
 used).</p></li>
+<li><p><a class="reference external" href="https://github.com/lincolnloop/python-qrcode">python-qrcode</a>
+(used in generating cover sheets for automatic processing of scans
+of scripts; needed if document generation or the registration system
+are used).</p></li>
 <li><p><a class="reference external" href="https://python-pillow.org/">Pillow</a>, built with support for JPEG
 and PNG files.</p></li>
+<li><p><a class="reference external" href="https://requests.readthedocs.io/en/latest/">Requests</a> (used for
+automatic uploading of scripts to the registration system based on
+barcoded cover sheets).</p></li>
+<li><p><a class="reference external" href="https://poppler.freedesktop.org/">poppler</a>; specifically, the
+<strong class="command">pdftoppm</strong> command (used for automatic processing of
+scripts based on barcoded cover sheets).</p></li>
+<li><p><cite>ImageMagick &lt;https://imagemagick.org/&gt;</cite> (used for automatic
+processing of scripts based on barcoded cover sheets).</p></li>
+<li><p><cite>ZBar &lt;https://github.com/mchehab/zbar&gt;</cite> (used for automatic
+processing of scripts based on barcoded cover sheets).</p></li>
 <li><p><a class="reference external" href="https://www.latex-project.org/">LaTeX</a>; specifically, the
 <strong class="command">pdflatex</strong> command (used in generating PDF documents from
 registration system data; not needed if that part of matholymp is
@@ -143,7 +157,7 @@ these modules can be found when the Roundup registration system is run
 <code class="file docutils literal notranslate"><span class="pre">matholymp/</span></code> directory, or by setting <span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONPATH</span></code>
 appropriately).  Some parts of the matholymp code have a testsuite,
 which can be run with <strong class="command">mo-run-tests</strong>; all tests should pass.</p>
-<p>The matholymp functionality falls into three main areas.  Although the
+<p>The matholymp functionality falls into four main areas.  Although the
 software is designed as an integrated whole, you can also choose to
 use only parts of the functionality.  Whichever parts of the system
 you use, you will be maintaining directories containing configuration
@@ -160,6 +174,7 @@ up the raw files containing the database).</p>
 <li><p><a class="reference internal" href="../static-site/#static-site"><span class="std std-ref">Static site generation</span></a>.</p></li>
 <li><p><a class="reference internal" href="../online-registration/#online-registration"><span class="std std-ref">Online registration</span></a>.</p></li>
 <li><p><a class="reference internal" href="../document-generation/#document-generation"><span class="std std-ref">Document generation</span></a>.</p></li>
+<li><p><a class="reference internal" href="../scan-processing/#scan-processing"><span class="std std-ref">Scan processing</span></a>.</p></li>
 </ul>
 </section>
 
@@ -186,6 +201,7 @@ up the raw files containing the database).</p>
 <li class="toctree-l1"><a class="reference internal" href="../static-site/">Static site generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../online-registration/">Online registration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../document-generation/">Document generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scan-processing/">Scan processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/">Contributing to matholymp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release-notes/">Release notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../copying/">Copyright and license</a></li>
