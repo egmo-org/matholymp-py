@@ -42,15 +42,10 @@ events, it is likely your own event is not the only one that could use
 a particular feature).
 
 If you wish to contribute changes to matholymp, you should be working
-with the current Git version.  You can then send me diffs generated
-with :command:`git diff` or :command:`git format-patch`, either using
-:command:`git send-email` or with your normal email client (if sending
-with your normal email client, patches should be attached, unless you
-are sure your email client does not change whitespace, including UTF-8
-BOMs, when including something inline).  You can also send Git pull
-requests if you prefer.
+with the current Git version, and can contribute with GitHub pull
+requests.
 
-Please keep patches following the existing coding style (which
+Please keep changes following the existing coding style (which
 generally tries to follow :pep:`8`).  The code is designed so that
 configuration for a particular event can be done in configuration
 files and HTML and LaTeX templates, so if a feature is only
