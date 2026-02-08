@@ -30,8 +30,9 @@
 """This module provides reactors for the Roundup registration system."""
 
 __all__ = ['country_react', 'person_react', 'scoreboard_react',
-           'register_reactors']
+           'queue_scan_react', 'register_reactors']
 
+import os
 import os.path
 
 from pypdf import PdfReader
@@ -134,6 +135,20 @@ def scoreboard_react(db, cl, nodeid, oldvalues):
     invalidate_cache(db, 'scoreboard')
 
 
+def queue_scan_react(db, cl, nodeid, oldvalues):
+    """Create a symlink for a multi-script scan added to the queue."""
+    db_path = db.config.DATABASE
+    subdir_path = os.path.join(db_path, 'queue_scan')
+    os.makedirs(subdir_path, exist_ok=True)
+    filename = db.filename('queue_scan', nodeid)
+    # The reactor is called before the file has been renamed from its
+    # temporary name; adjust the filename accordingly so the symlink
+    # is valid after that renaming.
+    if filename.endswith('.tmp'):
+        filename = filename[:-len('.tmp')]
+    os.symlink(filename, os.path.join(subdir_path, '%s.pdf' % nodeid))
+
+
 def register_reactors(db):
     """Register the matholymp reactors with Roundup."""
     db.country.react('set', country_react)
@@ -152,3 +167,4 @@ def register_reactors(db):
     db.matholymprole.react('create', scoreboard_react)
     db.matholymprole.react('retire', scoreboard_react)
     db.matholymprole.react('restore', scoreboard_react)
+    db.queue_scan.react('create', queue_scan_react)

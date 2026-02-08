@@ -32,7 +32,7 @@
 __all__ = ['audit_event_fields', 'audit_file_format', 'audit_country_fields',
            'audit_person_arrdep', 'audit_person_fields',
            'audit_matholymprole_fields', 'audit_badge_type_fields',
-           'register_auditors']
+           'audit_queue_scan_fields', 'register_auditors']
 
 import os.path
 import re
@@ -103,7 +103,9 @@ def audit_file_format(db, cls, file_id, desc1, desc2, fmts, fmtdesc):
         # This is the case of bulk registration, where the filename
         # and contents are specified directly at verification time and
         # the database object is only created when the bulk
-        # registration is acted on.
+        # registration is acted on, as well as for auditors for file
+        # classes themselves, when the object may not yet have been
+        # created.
         format_contents = file_format_contents(None, file_id[1])
         format_ext = file_extension(file_id[0])
     else:
@@ -865,6 +867,16 @@ def audit_badge_type_fields(db, cl, nodeid, newvalues):
         raise ValueError('Text colour not six hexadecimal characters')
 
 
+def audit_queue_scan_fields(db, cl, nodeid, newvalues):
+    """Make sure queue scan properties are valid."""
+    name = require_value(db, cl, nodeid, newvalues, 'name',
+                         'No queue scan name specified')
+    content = require_value(db, cl, nodeid, newvalues, 'content',
+                            'No queue scan content specified')
+    audit_file_format(db, 'queue_scan', (name, content), 'Queue scans',
+                      'queue scan', ('pdf',), 'PDF')
+
+
 def register_auditors(db):
     """Register the matholymp auditors with Roundup."""
     db.event.audit('set', audit_event_fields)
@@ -877,5 +889,7 @@ def register_auditors(db):
     db.matholymprole.audit('create', audit_matholymprole_fields)
     db.badge_type.audit('set', audit_badge_type_fields)
     db.badge_type.audit('create', audit_badge_type_fields)
+    db.queue_scan.audit('set', audit_queue_scan_fields)
+    db.queue_scan.audit('create', audit_queue_scan_fields)
     db.user.audit('set', audit_user_fields)
     db.user.audit('create', audit_user_fields)

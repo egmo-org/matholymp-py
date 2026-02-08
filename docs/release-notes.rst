@@ -133,7 +133,8 @@ Next version (unreleased)
 
 * There is partial support for handling scans of scripts.  The
   registration system has a new configuration variable
-  ``matholymp_num_exams``.  New files :file:`script.index.html`,
+  ``matholymp_num_exams``.  New files :file:`queue_scan.index.html`,
+  :file:`queue_scan.item.html`, :file:`script.index.html`,
   :file:`script.item.html` and :file:`script.manage.html` are added;
   :file:`page.html` and :file:`person.item.html` are changed.
   Document generation has new configuration variables

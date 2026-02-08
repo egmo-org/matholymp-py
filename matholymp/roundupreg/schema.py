@@ -279,6 +279,10 @@ def init_schema(env):
               content=String(indexme='no'),
               name=String(), pages=Integer(), has_cover_sheet=Boolean())
 
+    FileClass(db, 'queue_scan',
+              content=String(indexme='no'),
+              name=String())
+
     # Set up permissions:
 
     db.security.addPermission(
@@ -587,6 +591,9 @@ def init_schema(env):
     db.security.addPermissionToRole('Scan', 'Create', 'script')
     db.security.addPermissionToRole('Scan', 'Edit', 'script')
     db.security.addPermissionToRole('Scan', 'View', 'script')
+    db.security.addPermissionToRole('Scan', 'Create', 'queue_scan')
+    db.security.addPermissionToRole('Scan', 'Edit', 'queue_scan')
+    db.security.addPermissionToRole('Scan', 'View', 'queue_scan')
 
     def own_country_script(db, userid, itemid):
         """Determine whether the userid matches the country of the script

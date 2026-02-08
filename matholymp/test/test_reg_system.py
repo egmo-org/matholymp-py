@@ -53,6 +53,7 @@ from pypdf import PdfReader, PdfWriter
 try:
     import mechanicalsoup
     from PIL import Image
+    import requests
     import roundup.instance
     import roundup.password
     # roundup_server modifies sys.path on import, so save and restore it.
@@ -842,6 +843,31 @@ class RoundupTestSession:
         self.set(data)
         self.check_submit_selected(error=error, mail=mail)
 
+    def rest_create_file(self, cls, username, data, content, error=False):
+        """Create some kind of file through the REST interface."""
+        base_url = self.instance.url[:-1]
+        base_rest_url = base_url + '/rest/data/'
+        r = requests.post(  # pylint: disable=missing-timeout
+            base_rest_url + cls,
+            auth=(username, self.instance.passwords[username]),
+            headers={'X-Requested-With': 'rest',
+                     'Referer': base_url,
+                     'Origin': base_url,
+                     'Accept': 'application/json'},
+            data=data,
+            files={'content': content})
+        if error:
+            rjson = r.json()
+            if not isinstance(error, str):
+                error = ''
+            if 'error' in rjson and re.search(error, rjson['error']['msg']):
+                pass
+            else:
+                raise ValueError('request did not produce expected error: %s'
+                                 % r.text)
+        else:
+            r.raise_for_status()
+
 
 def _with_config(**kwargs):
     """A decorator to add a config attribute to a test method."""
@@ -1017,7 +1043,8 @@ class RegSystemTestCase(unittest.TestCase):
         session = self.get_session()
         forbid_classes = {'event', 'rss', 'arrival', 'badge_type',
                           'consent_form', 'id_scan', 'gender', 'language',
-                          'room_type', 'script', 'tshirt', 'user'}
+                          'queue_scan', 'room_type', 'script', 'tshirt',
+                          'user'}
         forbid_templates = {'country.bulkconfirm.html',
                             'country.bulkregister.html',
                             'country.retireconfirm.html',
@@ -1042,7 +1069,7 @@ class RegSystemTestCase(unittest.TestCase):
         session = self.get_session('scoring')
         forbid_classes = {'event', 'rss', 'arrival', 'badge_type',
                           'consent_form', 'id_scan', 'gender', 'language',
-                          'room_type', 'script', 'tshirt'}
+                          'queue_scan', 'room_type', 'script', 'tshirt'}
         forbid_templates = {'country.bulkconfirm.html',
                             'country.bulkregister.html',
                             'country.prereg.html',
@@ -1065,7 +1092,7 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session = self.get_session('admin')
         admin_session.create_country_generic()
         session = self.get_session('ABC_reg')
-        forbid_classes = {'badge_type', 'event', 'rss'}
+        forbid_classes = {'badge_type', 'event', 'queue_scan', 'rss'}
         forbid_templates = {'country.bulkconfirm.html',
                             'country.bulkregister.html',
                             'country.prereg.html',
@@ -1090,7 +1117,7 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session.create_country('DEF', 'Test Second Country',
                                      {'flag-1@content': flag_filename})
         photo_filename, dummy = self.gen_test_image(2, 2, 2, '.jpg', 'JPEG')
-        pdf_filename, dummy = self.gen_test_pdf()
+        pdf_filename, pdf_content = self.gen_test_pdf()
         admin_session.create_person('XMO 2015 Staff', 'Coordinator',
                                     {'photo-1@content': photo_filename,
                                      'consent_form-1@content': pdf_filename,
@@ -1102,6 +1129,11 @@ class RegSystemTestCase(unittest.TestCase):
             admin_session.get_main().find_all('form')[0])
         admin_session.set({'script-1@content': pdf_filename})
         admin_session.check_submit_selected()
+        admin_session.rest_create_file(
+            'queue_scan',
+            'admin',
+            {'name': 'scan.pdf', 'type': 'application/pdf'},
+            pdf_content)
         # Set a score to create an rss item.
         admin_session.edit('event', '1',
                            {'registration_enabled': 'no'})
@@ -1133,7 +1165,8 @@ class RegSystemTestCase(unittest.TestCase):
         session = self.get_session()
         forbid_classes = {'event', 'rss', 'arrival', 'badge_type',
                           'consent_form', 'id_scan', 'gender', 'language',
-                          'room_type', 'script', 'tshirt', 'user'}
+                          'queue_scan', 'room_type', 'script', 'tshirt',
+                          'user'}
         self.all_templates_item_test(admin_session, session,
                                      forbid_classes=forbid_classes)
 
@@ -1148,7 +1181,8 @@ class RegSystemTestCase(unittest.TestCase):
         # user1 is another user, so gives an error.
         forbid_classes = {'event', 'rss', 'arrival', 'badge_type',
                           'consent_form', 'id_scan', 'gender', 'language',
-                          'room_type', 'script', 'tshirt', 'user'}
+                          'queue_scan', 'room_type', 'script', 'tshirt',
+                          'user'}
         self.all_templates_item_test(admin_session, session,
                                      forbid_classes=forbid_classes)
 
@@ -1163,7 +1197,7 @@ class RegSystemTestCase(unittest.TestCase):
         # consent_form1, id_scan1 and script1 are for another country,
         # so give errors.  user1 is another user, so gives an error.
         forbid_classes = {'badge_type', 'consent_form', 'id_scan', 'event',
-                          'rss', 'script', 'user'}
+                          'queue_scan', 'rss', 'script', 'user'}
         self.all_templates_item_test(admin_session, session,
                                      forbid_classes=forbid_classes)
 
@@ -16316,6 +16350,92 @@ class RegSystemTestCase(unittest.TestCase):
                          {'username': 'DEF_reg'},
                          error='You do not have permission to edit',
                          status=403)
+
+    def test_queue_scan(self):
+        """
+        Test queue scan creation.
+        """
+        admin_session = self.get_session('admin')
+        admin_session.create_scans_user()
+        dummy, pdf_content = self.gen_test_pdf()
+        dummy, pdf2_content = self.gen_test_pdf()
+        admin_session.rest_create_file(
+            'queue_scan',
+            'admin',
+            {'name': 'scan.pdf', 'type': 'application/pdf'},
+            pdf_content)
+        with open(os.path.join(self.instance.instance_dir,
+                               'db', 'queue_scan', '1.pdf'), 'rb') as f:
+            pdf_linked = f.read()
+        self.assertEqual(pdf_linked, pdf_content)
+        admin_session.rest_create_file(
+            'queue_scan',
+            'scans',
+            {'name': 'scan.PDF', 'type': 'application/pdf'},
+            pdf2_content)
+        with open(os.path.join(self.instance.instance_dir,
+                               'db', 'queue_scan', '2.pdf'), 'rb') as f:
+            pdf2_linked = f.read()
+        self.assertEqual(pdf2_linked, pdf2_content)
+
+    def test_queue_errors(self):
+        """
+        Test queue scan creation errors.
+        """
+        admin_session = self.get_session('admin')
+        admin_session.create_scans_user()
+        dummy, pdf_content = self.gen_test_pdf()
+        dummy, png_content = self.gen_test_image(2, 2, 2, '.png', 'PNG')
+        admin_session.rest_create_file(
+            'queue_scan',
+            'admin',
+            {'name': '', 'type': 'application/pdf'},
+            pdf_content,
+            error='No queue scan name specified')
+        admin_session.rest_create_file(
+            'queue_scan',
+            'scans',
+            {'name': '', 'type': 'application/pdf'},
+            pdf_content,
+            error='No queue scan name specified')
+        admin_session.rest_create_file(
+            'queue_scan',
+            'admin',
+            {'name': 'scan.pdf', 'type': 'application/pdf'},
+            b'',
+            error='No queue scan content specified')
+        admin_session.rest_create_file(
+            'queue_scan',
+            'scans',
+            {'name': 'scan.pdf', 'type': 'application/pdf'},
+            b'',
+            error='No queue scan content specified')
+        admin_session.rest_create_file(
+            'queue_scan',
+            'admin',
+            {'name': 'scan.png', 'type': 'application/pdf'},
+            pdf_content,
+            error=r'Filename extension for queue scan must match '
+            r'contents \(pdf\)')
+        admin_session.rest_create_file(
+            'queue_scan',
+            'scans',
+            {'name': 'scan.png', 'type': 'application/pdf'},
+            pdf_content,
+            error=r'Filename extension for queue scan must match '
+            r'contents \(pdf\)')
+        admin_session.rest_create_file(
+            'queue_scan',
+            'admin',
+            {'name': 'scan.png', 'type': 'application/pdf'},
+            png_content,
+            error='Queue scans must be in PDF format')
+        admin_session.rest_create_file(
+            'queue_scan',
+            'scans',
+            {'name': 'scan.png', 'type': 'application/pdf'},
+            png_content,
+            error='Queue scans must be in PDF format')
 
 
 def _set_coverage(tests, coverage):
