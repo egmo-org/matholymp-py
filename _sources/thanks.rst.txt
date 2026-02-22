@@ -44,6 +44,8 @@ limited to:
 
 * James Cranch
 
+* Edwige Cyffers
+
 * Birgit van Dalen
 
 * Beverley Detoeuf

@@ -149,6 +149,14 @@ contact list between events or for producing the public contact
 list, although changes to those registration details are emailed to
 the registration system contact address (<cite>admin_email</cite> from
 <code class="file docutils literal notranslate"><span class="pre">config.ini</span></code>) to enable them to update such a list manually.</p></li>
+<li><p>Document generation now supports generating combined invitation
+letters for a country.  This uses templates
+<code class="file docutils literal notranslate"><span class="pre">country-invitation-letter-template.tex</span></code> and
+<code class="file docutils literal notranslate"><span class="pre">country-invitation-letter-person-template.tex</span></code>.  For
+generating such invitation letters through the registration system,
+there is a new configuration variable
+<cite>matholymp_country_invitation_letter_register</cite> and
+<code class="file docutils literal notranslate"><span class="pre">country.prereg.html</span></code> is changed.</p></li>
 </ul>
 </section>
 <section id="version-2020-07-0-22-july-2020">

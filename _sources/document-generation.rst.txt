@@ -129,6 +129,19 @@ be, attending in person):
 
    mo-document-generate invitation-letter all
 
+Invitation letters
+^^^^^^^^^^^^^^^^^^
+
+To generate an invitation letter for a given country (covering all
+participants from that country who are, or might be, attending in
+person)::
+
+   mo-document-generate country-invitation-letter *code*
+
+or::
+
+   mo-document-generate country-invitation-letter *number*
+
 Desk labels
 ^^^^^^^^^^^
 
