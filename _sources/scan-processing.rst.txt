@@ -53,3 +53,9 @@ generation to generate the cover sheets.  The file pointed to by
 ``password_file`` should also exist, containing the password for the
 registration system account (with the ``Scan`` role) to be used to
 upload scripts.
+
+Symlinks to individual uploaded scans are automatically created in
+`db/scans` in the registration system directory.  The contents of this
+directory can be made available to coordinators through a web server
+to provide them with access to scans without needing a privileged
+registration system account.

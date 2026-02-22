@@ -53,6 +53,11 @@ generation to generate the cover sheets.  The file pointed to by
 <code class="docutils literal notranslate"><span class="pre">password_file</span></code> should also exist, containing the password for the
 registration system account (with the <code class="docutils literal notranslate"><span class="pre">Scan</span></code> role) to be used to
 upload scripts.</p>
+<p>Symlinks to individual uploaded scans are automatically created in
+<cite>db/scans</cite> in the registration system directory.  The contents of this
+directory can be made available to coordinators through a web server
+to provide them with access to scans without needing a privileged
+registration system account.</p>
 </section>
 
 
