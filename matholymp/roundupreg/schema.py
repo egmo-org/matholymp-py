@@ -58,8 +58,8 @@ from matholymp.roundupreg.config import distinguish_official, \
     have_consent_forms, have_id_scans, have_consent_ui, \
     have_passport_numbers, have_nationality, get_script_scan_props, \
     get_language_numbers, get_future_contact_numbers, \
-    invitation_letter_register, is_virtual_event, have_remote_participation, \
-    allow_hybrid_countries
+    invitation_letter_register, country_invitation_letter_register, \
+    is_virtual_event, have_remote_participation, allow_hybrid_countries
 from matholymp.roundupreg.rounduputil import person_is_contestant, show_scores
 
 __all__ = ['init_schema']
@@ -725,10 +725,17 @@ def init_schema(env):
     db.security.addPermissionToRole('Admin', p)
     p = db.security.addPermission(name='GenerateInvitationLettersZip')
     db.security.addPermissionToRole('Admin', p)
+    p = db.security.addPermission(name='GenerateCountryInvitationLetters')
+    db.security.addPermissionToRole('Admin', p)
 
     if invitation_letter_register(db):
         p = db.security.addPermission(name='GenerateInvitationLetters',
                                       klass='person', check=own_country_person)
+        db.security.addPermissionToRole('Register', p)
+
+    if country_invitation_letter_register(db):
+        p = db.security.addPermission(name='GenerateCountryInvitationLetters',
+                                      klass='country', check=own_country)
         db.security.addPermissionToRole('Register', p)
 
     # Permission to edit countries in general, rather than just a

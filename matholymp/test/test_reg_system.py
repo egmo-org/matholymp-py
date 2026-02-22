@@ -4838,6 +4838,192 @@ class RegSystemTestCase(unittest.TestCase):
                                     error='Scores are currently hidden',
                                     status=403)
 
+    @_with_config(docgen_directory='docgen', require_passport_number='Yes',
+                  require_nationality='Yes')
+    def test_country_invitation_letter(self):
+        """
+        Test online invitation letter creation.
+        """
+        admin_session = self.get_session('admin')
+        admin_session.create_person('XMO 2015 Staff', 'Coordinator',
+                                    {'passport_number': '123454321',
+                                     'nationality': 'Matholympian'})
+        admin_session.check_open_relative('country1?@template=prereg')
+        admin_session.b.select_form(
+            admin_session.get_main().find_all('form')[1])
+        invitation_response = admin_session.check_submit_selected(html=False)
+        self.assertEqual(invitation_response.headers['content-type'],
+                         'application/pdf')
+        self.assertEqual(invitation_response.headers['content-disposition'],
+                         'attachment; filename=invitation-letter-country1.pdf')
+        self.assertTrue(invitation_response.content.startswith(b'%PDF-'))
+        # Changing relevant details after an invitation letter was
+        # generated results in an email being sent; changing
+        # irrelevant details does not.
+        admin_session.edit('person', '1',
+                           {'given_name': 'Changed Given'},
+                           mail=True)
+        self.assertIn(
+            b'TO: admin@example.invalid, webmaster@example.invalid\n',
+            admin_session.last_mail_bin)
+        admin_session.edit('person', '1',
+                           {'tshirt': 'M'})
+        admin_session.edit('person', '1',
+                           {'family_name': 'Changed Family'},
+                           mail=True)
+        admin_session.edit('person', '1',
+                           {'passport_given_name': 'Changed Passport Given'},
+                           mail=True)
+        admin_session.edit('person', '1',
+                           {'passport_family_name': 'Changed Passport Family'},
+                           mail=True)
+        admin_session.edit('person', '1',
+                           {'nationality': 'Other'},
+                           mail=True)
+        admin_session.edit('person', '1',
+                           {'passport_number': '987654321'},
+                           mail=True)
+        admin_session.edit('person', '1',
+                           {'gender': 'Male'},
+                           mail=True)
+        admin_session.edit('person', '1',
+                           {'date_of_birth_year': '1999'},
+                           mail=True)
+        admin_session.edit('person', '1',
+                           {'date_of_birth_month': 'February'},
+                           mail=True)
+        admin_session.edit('person', '1',
+                           {'date_of_birth_day': '2'},
+                           mail=True)
+
+    @_with_config(docgen_directory='docgen')
+    def test_country_invitation_letter_register(self):
+        """
+        Test online invitation letter creation with registering user.
+        """
+        admin_session = self.get_session('admin')
+        admin_session.create_country_generic()
+        reg_session = self.get_session('ABC_reg')
+        reg_session.create_person('Test First Country', 'Contestant 2')
+        reg_session.check_open_relative('country3?@template=prereg')
+        reg_session.b.select_form(
+            reg_session.get_main().find_all('form')[1])
+        invitation_response = reg_session.check_submit_selected(html=False)
+        self.assertEqual(invitation_response.headers['content-type'],
+                         'application/pdf')
+        self.assertEqual(invitation_response.headers['content-disposition'],
+                         'attachment; filename=invitation-letter-country3.pdf')
+        self.assertTrue(invitation_response.content.startswith(b'%PDF-'))
+
+    @_with_config(docgen_directory='docgen')
+    def test_country_invitation_letter_errors(self):
+        """
+        Test errors from online invitation letter creation.
+        """
+        admin_session = self.get_session('admin')
+        admin_session.create_person('XMO 2015 Staff', 'Coordinator')
+        admin_session.check_open_relative('country1?@template=prereg')
+        form = admin_session.get_main().find_all('form')[1]
+        form['action'] = 'person1'
+        admin_session.b.select_form(form)
+        admin_session.check_submit_selected(error='Invalid class for document '
+                                            'generation')
+        admin_session.check_open_relative('country1?@template=prereg')
+        form = admin_session.get_main().find_all('form')[1]
+        form['action'] = 'country'
+        admin_session.b.select_form(form)
+        # Unsupported zip creation for all country invitation letters
+        # shows as a permission error here.
+        admin_session.check_submit_selected(error='You do not have '
+                                            'permission to generate the '
+                                            'country invitation letter for',
+                                            status=403)
+        admin_session.check_open_relative('country1?@template=prereg')
+        form = admin_session.get_main().find_all('form')[1]
+        admin_session.b.select_form(form)
+        with open(os.path.join(self.instance.docgen_dir, 'templates',
+                               'country-invitation-letter-template.tex'), 'w',
+                  encoding='utf-8') as f:
+            f.write(r'\notavalidlatexdocument')
+        invitation_response = admin_session.check_submit_selected(html=False,
+                                                                  mail=True)
+        self.assertEqual(invitation_response.headers['content-type'],
+                         'text/plain; charset=UTF-8')
+        self.assertIn(b'notavalidlatexdocument', invitation_response.content)
+        self.assertIn(b'notavalidlatexdocument', admin_session.last_mail_dec)
+        # Permission error (requires user to have valid form, then
+        # have permissions removed, then try submitting it).
+        admin_session.create_user('admin2', 'XMO 2015 Staff', 'Admin')
+        admin2_session = self.get_session('admin2')
+        admin2_session.check_open_relative('country1?@template=prereg')
+        form = admin2_session.get_main().find_all('form')[1]
+        admin2_session.b.select_form(form)
+        admin_session.edit('user', self.instance.userids['admin2'],
+                           {'roles': 'User,Score'})
+        admin2_session.check_submit_selected(error='You do not have '
+                                             'permission to generate the '
+                                             'country invitation letter for',
+                                             status=403)
+        # Similarly, with a registering user.
+        admin_session.create_country_generic()
+        reg_session = self.get_session('ABC_reg')
+        admin_session.edit('user', self.instance.userids['ABC_reg'],
+                           {'roles': 'Admin'})
+        reg_session.check_open_relative('country1?@template=prereg')
+        form = reg_session.get_main().find_all('form')[1]
+        reg_session.b.select_form(form)
+        admin_session.edit('user', self.instance.userids['ABC_reg'],
+                           {'roles': 'User,Register'})
+        reg_session.check_submit_selected(error='You do not have '
+                                          'permission to generate the '
+                                          'country invitation letter for',
+                                          status=403)
+
+    def test_country_invitation_letter_none(self):
+        """
+        Test online invitation letter creation disabled.
+        """
+        admin_session = self.get_session('admin')
+        admin_session.create_person('XMO 2015 Staff', 'Coordinator')
+        admin_session.check_open_relative('country1?@template=prereg')
+        form_list = admin_session.get_main().find_all('form')
+        self.assertEqual(len(form_list), 1)
+        # Modify the form to use the country_invitation_letter action
+        # to test the error when no document generation directory is
+        # configured.
+        form = form_list[0]
+        submit = form.find('input', type='submit')
+        self.assertEqual(submit['value'],
+                         'Confirm these numbers of participants')
+        admin_session.b.select_form(form)
+        admin_session.b.get_current_form().set('@action',
+                                               'country_invitation_letter',
+                                               force=True)
+        admin_session.check_submit_selected(error='Online document generation '
+                                            'not enabled')
+
+    @_with_config(docgen_directory='docgen',
+                  country_invitation_letter_register='No')
+    def test_country_invitation_letter_register_none(self):
+        """
+        Test online invitation letter creation by registering user disabled.
+        """
+        admin_session = self.get_session('admin')
+        admin_session.create_country_generic()
+        reg_session = self.get_session('ABC_reg')
+        reg_session.create_person('Test First Country', 'Contestant 2')
+        admin_session.edit('user', self.instance.userids['ABC_reg'],
+                           {'roles': 'Admin'})
+        reg_session.check_open_relative('country3?@template=prereg')
+        form = reg_session.get_main().find_all('form')[1]
+        reg_session.b.select_form(form)
+        admin_session.edit('user', self.instance.userids['ABC_reg'],
+                           {'roles': 'User,Register'})
+        reg_session.check_submit_selected(error='You do not have '
+                                          'permission to generate the '
+                                          'country invitation letter for',
+                                          status=403)
+
     def test_person_csv(self):
         """
         Test CSV file of people.

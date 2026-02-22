@@ -171,7 +171,11 @@ Next version (unreleased)
 * Document generation now supports generating combined invitation
   letters for a country.  This uses templates
   :file:`country-invitation-letter-template.tex` and
-  :file:`country-invitation-letter-person-template.tex`.
+  :file:`country-invitation-letter-person-template.tex`.  For
+  generating such invitation letters through the registration system,
+  there is a new configuration variable
+  `matholymp_country_invitation_letter_register` and
+  :file:`country.prereg.html` is changed.
 
 Version 2020.07.0 (22 July 2020)
 --------------------------------

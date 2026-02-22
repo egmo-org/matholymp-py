@@ -34,7 +34,8 @@ __all__ = ['ScoreAction', 'RetireCountryAction', 'ScalePhotoAction',
            'MedalBoundariesCSVAction', 'FlagsZIPAction', 'PhotosZIPAction',
            'ConsentFormsZIPAction', 'IDScansZIPAction', 'FlagThumbAction',
            'PhotoThumbAction', 'ScoresRSSAction', 'DocumentGenerateAction',
-           'NameBadgeAction', 'InvitationLetterAction', 'BulkRegisterAction',
+           'NameBadgeAction', 'InvitationLetterAction',
+           'CountryInvitationLetterAction', 'BulkRegisterAction',
            'CountryBulkRegisterAction', 'PersonBulkRegisterAction',
            'register_actions']
 
@@ -512,8 +513,9 @@ class DocumentGenerateAction(Action):
         # for the case of no itemid, so make those checks here.
         if (self.nodeid is None
             and self.zip_permission_type != self.permissionType):
-            if not self.hasPermission(self.zip_permission_type,
-                                      classname=self.classname):
+            if (self.zip_permission_type is None
+                or not self.hasPermission(self.zip_permission_type,
+                                          classname=self.classname)):
                 raise Unauthorised('You do not have permission to %s the '
                                    '%s class' % (self.name, self.classname))
         if self.nodeid is not None:
@@ -641,6 +643,25 @@ class InvitationLetterAction(DocumentGenerateAction):
 
     def zip_dirname(self):
         return 'invitation-letters'
+
+
+class CountryInvitationLetterAction(DocumentGenerateAction):
+
+    """Action to generate a country's invitation letter."""
+
+    name = 'generate the country invitation letter for'
+    permissionType = 'GenerateCountryInvitationLetters'
+    required_classname = 'country'
+
+    def generate_documents(self, docgen):
+        docgen.generate_country_invitation_letters(self.nodeid)
+        for p in self.db.person.filter(None, {'country': self.nodeid}):
+            if not person_is_remote(self.db, p):
+                self.db.person.set(p, invitation_letter_generated=True)
+        self.db.commit()
+
+    def document_filename(self):
+        return 'invitation-letter-country%s.pdf' % self.nodeid
 
 
 class BulkRegisterAction(Action):
@@ -1039,5 +1060,7 @@ def register_actions(instance):
     instance.registerAction('scores_rss', ScoresRSSAction)
     instance.registerAction('name_badge', NameBadgeAction)
     instance.registerAction('invitation_letter', InvitationLetterAction)
+    instance.registerAction('country_invitation_letter',
+                            CountryInvitationLetterAction)
     instance.registerAction('country_bulk_register', CountryBulkRegisterAction)
     instance.registerAction('person_bulk_register', PersonBulkRegisterAction)

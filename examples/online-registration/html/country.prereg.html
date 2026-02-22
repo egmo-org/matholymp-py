@@ -194,6 +194,23 @@ define="edit_ok context/is_edit_ok"
 </table>
 </form>
 
+<tal:block tal:condition="context/id">
+<tal:block tal:condition="python:not db._db.country.is_retired(context.id)">
+<tal:block tal:condition="python:db._db.config.ext['MATHOLYMP_DOCGEN_DIRECTORY'] and request.user.hasPermission('GenerateCountryInvitationLetters', 'country', None, context.id)">
+<form method="GET" tal:attributes="action context/designator">
+<table class="form">
+<tr>
+<td>
+<input type="hidden" name="@action" value="country_invitation_letter">
+<input type="submit" value="Generate invitation letter">
+</td>
+</tr>
+</table>
+</form>
+</tal:block>
+</tal:block>
+</tal:block>
+
 </div>
 
 </td>
