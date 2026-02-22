@@ -243,6 +243,26 @@ class DocumentGenerator:
             raise ValueError('Person %d not a contestant' % p.person.id)
         return p
 
+    def get_country_by_id(self, country_id):
+        """
+        Given that the selected id must represent a valid country,
+        return that country.
+        """
+        id_numeric = re.fullmatch('[0-9]+', country_id)
+        if country_id == '':
+            raise ValueError('Empty country identifier')
+        elif id_numeric and int(country_id) in self._event.country_map:
+            return self._event.country_map[int(country_id)]
+        else:
+            countries = [c for c in self._event.country_list
+                         if c.code == country_id]
+            if len(countries) > 1:
+                raise ValueError('Country %s present more than once'
+                                 % country_id)
+            if not countries:
+                raise ValueError('Country %s not found' % country_id)
+            return countries[0]
+
     def adjust_image_path(self, filename, url, new_name):
         """Return a local path to an image with suitable filename extension."""
         url_ext = file_extension(url)
@@ -454,6 +474,41 @@ class DocumentGenerator:
         else:
             p = self.get_person_by_id(person_id)
             self.generate_invitation_letter(p)
+
+    def generate_country_invitation_letter(self, country):
+        """Generate the invitation letter for a particular country."""
+        template_file_base = 'country-invitation-letter-template'
+        person_template_file = os.path.join(
+            self._templates_dir,
+            'country-invitation-letter-person-template.tex')
+        person_template_text = read_text_from_file(person_template_file)
+        people_subst = []
+        for person in sorted(country.person_list, key=lambda x: x.sort_key):
+            if person.remote_participant:
+                continue
+            template_fields = {'given_name': person.passport_given_name,
+                               'family_name': person.passport_family_name,
+                               'nationality': person.nationality or '',
+                               'passport_number': person.passport_number or '',
+                               'gender': person.gender or '',
+                               'date_of_birth': date_to_name(
+                                   person.date_of_birth)}
+            people_subst.append(self.subst_values_in_template_text(
+                person_template_text, template_fields, []))
+        output_file_base = ('invitation-letter-country'
+                            + str(country.country.id))
+        template_fields = {'country': country.name,
+                           'people': '\n'.join(people_subst)}
+        raw_fields = ['people']
+        self.subst_and_pdflatex(template_file_base, output_file_base,
+                                template_fields, raw_fields)
+
+    def generate_country_invitation_letters(self, country_id):
+        """
+        Generate all country invitation letters requested by the command line.
+        """
+        c = self.get_country_by_id(country_id)
+        self.generate_country_invitation_letter(c)
 
     def generate_desk_labels(self, person_id, exam_order):
         """Generate all desk labels requested by the command line."""

@@ -36,12 +36,12 @@ when logged in administratively), countries.csv and flags/ and photos/
 directories from unpacking the corresponding .zip files, and generates
 output in an out/ subdirectory, unless options are used to select
 other directories.  The known types of document are 'badge',
-'invitation-letter', 'desk-label', 'award-certificate',
-'participation-certificate', 'paper', 'language-list', 'coord-form',
-'cover-sheet' and 'scores-commands'.  The identifiers passed along
-with document types vary; any identifier may be used for document
-types that do not depend on such an identifier, and 'all' is suitable
-for most cases.
+'country-invitation-letter', 'invitation-letter', 'desk-label',
+'award-certificate', 'participation-certificate', 'paper',
+'language-list', 'coord-form', 'cover-sheet' and 'scores-commands'.
+The identifiers passed along with document types vary; any identifier
+may be used for document types that do not depend on such an
+identifier, and 'all' is suitable for most cases.
 """
 
 import argparse
@@ -116,6 +116,8 @@ def main():
     bg = cmdline_data['background']
     if cmdline_data['type'] == 'badge':
         docgen.generate_badges(gen_id, bg)
+    elif cmdline_data['type'] == 'country-invitation-letter':
+        docgen.generate_country_invitation_letters(gen_id)
     elif cmdline_data['type'] == 'invitation-letter':
         docgen.generate_invitation_letters(gen_id)
     elif cmdline_data['type'] == 'desk-label':

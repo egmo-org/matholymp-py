@@ -168,6 +168,11 @@ Next version (unreleased)
   the registration system contact address (`admin_email` from
   :file:`config.ini`) to enable them to update such a list manually.
 
+* Document generation now supports generating combined invitation
+  letters for a country.  This uses templates
+  :file:`country-invitation-letter-template.tex` and
+  :file:`country-invitation-letter-person-template.tex`.
+
 Version 2020.07.0 (22 July 2020)
 --------------------------------
 
