@@ -42,8 +42,10 @@ import roundup.password
 from matholymp.fileutil import read_text_from_file
 from matholymp.roundupreg.cache import invalidate_cache
 from matholymp.roundupreg.config import have_consent_forms, have_id_scans, \
-    get_short_name_year, get_script_scan_props
+    get_short_name_year, get_script_scan_props_code
 from matholymp.roundupreg.roundupemail import send_email
+from matholymp.roundupreg.rounduputil import person_is_contestant, \
+    contestant_code
 
 
 def country_react(db, cl, nodeid, oldvalues):
@@ -120,14 +122,42 @@ def person_react(db, cl, nodeid, oldvalues):
             sc_person = db.id_scan.get(sc_id, 'person')
             if nodeid != sc_person:
                 db.id_scan.set(sc_id, person=nodeid)
-    for p in get_script_scan_props(db):
+    scans_path = os.path.join(db.config.DATABASE, 'scans')
+    for p_code, p in get_script_scan_props_code(db):
         sc_id = db.person.get(nodeid, p)
         if sc_id:
-            with open(db.filename('script', sc_id), 'rb') as pdf_file:
+            filename = db.filename('script', sc_id)
+            with open(filename, 'rb') as pdf_file:
                 r = PdfReader(pdf_file)
                 pages = len(r.pages)
                 if pages != db.script.get(sc_id, 'pages'):
                     db.script.set(sc_id, pages=pages)
+            scans_subdir = os.path.join(scans_path, p_code)
+            os.makedirs(scans_subdir, exist_ok=True)
+            if filename.endswith('.tmp'):
+                filename = filename[:-len('.tmp')]
+            if not person_is_contestant(db, nodeid):
+                continue
+            ccode = contestant_code(db, nodeid)
+            linkname = os.path.join(scans_subdir,
+                                    '%s-%s.pdf' % (ccode, p_code))
+            try:
+                old_link = os.readlink(linkname)
+            except FileNotFoundError:
+                old_link = None
+            if old_link == filename:
+                continue
+            try:
+                os.remove(linkname)
+            except FileNotFoundError:
+                pass
+            try:
+                os.symlink(filename, linkname)
+            except FileExistsError:
+                # Potential race with multiple simultaneous script
+                # uploads for same contestant (may not actually be
+                # possible).
+                pass
 
 
 def scoreboard_react(db, cl, nodeid, oldvalues):

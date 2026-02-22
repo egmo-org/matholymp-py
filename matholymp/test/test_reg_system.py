@@ -8661,6 +8661,15 @@ class RegSystemTestCase(unittest.TestCase):
         got_bytes = admin_session.get_link_contents(
             'Script Scan P1')
         self.assertEqual(got_bytes, sc2_bytes)
+        # Check the symlinks from db/scans.
+        with open(os.path.join(self.instance.instance_dir,
+                               'db', 'scans', 'P1', 'ABC1-P1.pdf'), 'rb') as f:
+            pdf_linked = f.read()
+        self.assertEqual(pdf_linked, sc1_bytes)
+        with open(os.path.join(self.instance.instance_dir,
+                               'db', 'scans', 'P1', 'DEF2-P1.pdf'), 'rb') as f:
+            pdf_linked = f.read()
+        self.assertEqual(pdf_linked, sc2_bytes)
         admin_csv = admin_session.get_people_csv()
         admin_csv[0] = {'Script Scan P1 URL':
                         admin_csv[0]['Script Scan P1 URL'],
@@ -8701,6 +8710,11 @@ class RegSystemTestCase(unittest.TestCase):
         got_bytes = admin_session.get_link_contents(
             'Script Scan P6')
         self.assertEqual(got_bytes, sc3_bytes)
+        # Check the symlink from db/scans.
+        with open(os.path.join(self.instance.instance_dir,
+                               'db', 'scans', 'P6', 'ABC1-P6.pdf'), 'rb') as f:
+            pdf_linked = f.read()
+        self.assertEqual(pdf_linked, sc3_bytes)
         admin_csv = admin_session.get_people_csv()
         admin_csv[0] = {'Script Scan P6 URL':
                         admin_csv[0]['Script Scan P6 URL'],
@@ -8728,6 +8742,11 @@ class RegSystemTestCase(unittest.TestCase):
         got_bytes = admin_session.get_link_contents(
             'Scratch Scan Day 2')
         self.assertEqual(got_bytes, sc4_bytes)
+        # Check the symlink from db/scans.
+        with open(os.path.join(self.instance.instance_dir,
+                               'db', 'scans', 'S2', 'ABC1-S2.pdf'), 'rb') as f:
+            pdf_linked = f.read()
+        self.assertEqual(pdf_linked, sc4_bytes)
         admin_csv = admin_session.get_people_csv()
         admin_csv[0] = {'Scratch Scan Day 2 URL':
                         admin_csv[0]['Scratch Scan Day 2 URL'],
@@ -8745,6 +8764,16 @@ class RegSystemTestCase(unittest.TestCase):
         reg_bytes = reg_session.get_bytes(sc4_url_csv)
         self.assertEqual(admin_bytes, sc4_bytes)
         self.assertEqual(reg_bytes, sc4_bytes)
+        # Check the symlink is updated when replacing a scan.
+        admin_session.check_open_relative('script?@template=manage')
+        admin_session.b.select_form(
+            admin_session.get_main().find_all('form')[7])
+        admin_session.set({'script-1@content': sc1_filename})
+        admin_session.check_submit_selected()
+        with open(os.path.join(self.instance.instance_dir,
+                               'db', 'scans', 'S2', 'ABC1-S2.pdf'), 'rb') as f:
+            pdf_linked = f.read()
+        self.assertEqual(pdf_linked, sc1_bytes)
 
     def test_person_script_errors(self):
         """
