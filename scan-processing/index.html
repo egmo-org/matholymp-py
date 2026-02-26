@@ -45,7 +45,12 @@ distribution includes a version of <a class="reference download internal" downlo
 for configuring this.  The other arguments are the names of
 multi-script PDFs to process; <strong class="command">mo-process-script-scans</strong>
 creates a corresponding log file for each of those files with <code class="docutils literal notranslate"><span class="pre">.log</span></code>
-appended to its name.</p>
+appended to its name.  Alternatively, if it is run with the <cite>–watch</cite>
+option, the other argument is the name of a directory to watch for new
+multi-script PDFs having appeared; this is intended to be used with
+the <cite>db/queue_scan</cite> subdirectory of the registration system directory,
+and the PDFs must be complete before they appear in the named
+directory with a <cite>.pdf</cite> filename suffix.</p>
 <p>The file pointed to by <code class="docutils literal notranslate"><span class="pre">cover_sheet_key_file</span></code> should exist before
 this command is run, with the same 20 bytes of random data (generated
 afresh for each year’s event) as in the file used in document

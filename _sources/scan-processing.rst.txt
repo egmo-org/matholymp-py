@@ -44,7 +44,12 @@ distribution includes a version of :download:`scans.cfg
 for configuring this.  The other arguments are the names of
 multi-script PDFs to process; :command:`mo-process-script-scans`
 creates a corresponding log file for each of those files with ``.log``
-appended to its name.
+appended to its name.  Alternatively, if it is run with the `--watch`
+option, the other argument is the name of a directory to watch for new
+multi-script PDFs having appeared; this is intended to be used with
+the `db/queue_scan` subdirectory of the registration system directory,
+and the PDFs must be complete before they appear in the named
+directory with a `.pdf` filename suffix.
 
 The file pointed to by ``cover_sheet_key_file`` should exist before
 this command is run, with the same 20 bytes of random data (generated
