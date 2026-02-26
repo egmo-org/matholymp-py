@@ -44,9 +44,12 @@ import os.path
 import re
 import subprocess
 import tempfile
+import time
 import xml.etree.ElementTree
 
 from pypdf import PdfReader, PdfWriter
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 import matholymp
 from matholymp.fileutil import read_config
@@ -188,17 +191,84 @@ def _process_one_scan(scan, cfg_data):
             raise
 
 
+def _maybe_process_scan_from_watch(executor, cfg_data, path):
+    if not os.access(path, os.F_OK, follow_symlinks=False):
+        # File deletion or renaming event.
+        return
+    if os.access(path + '.log', os.F_OK):
+        # Already processed or being processed.
+        return
+    try:
+        with open(path + '.lock', 'x', encoding='utf-8'):
+            pass
+    except FileExistsError:
+        # Another thread has claimed this file.
+        return
+    while True:
+        # Because Roundup reactors run because files have been renamed
+        # to their final names, a symlink to an uploaded scan is
+        # created to what will be the final path but does not yet
+        # exist at that point.
+        if os.access(path, os.F_OK, follow_symlinks=True):
+            break
+        time.sleep(0.1)
+    executor.submit(_process_one_scan, path, cfg_data)
+
+
+class _ScanEventHandler(FileSystemEventHandler):
+
+    def __init__(self, executor, cfg_data):
+        self.mo_executor = executor
+        self.mo_cfg_data = cfg_data
+        super().__init__()
+
+    def on_any_event(self, event):
+        if hasattr(event, 'dest_path') and event.dest_path:
+            path = event.dest_path
+        else:
+            path = event.src_path
+        if path and path.endswith('.pdf'):
+            _maybe_process_scan_from_watch(
+                self.mo_executor, self.mo_cfg_data, path)
+
+
+def _do_watch(executor, cfg_data, dir_to_watch):
+    handler = _ScanEventHandler(executor, cfg_data)
+    observer = Observer()
+    observer.schedule(handler, dir_to_watch)
+    observer.start()
+    # Files already present at startup do not generate events, so make
+    # sure to handle them; the use of locks ensures a file created
+    # just after the watch starts is only processed once.
+    for f in os.scandir(dir_to_watch):
+        _maybe_process_scan_from_watch(executor, cfg_data, f.path)
+    try:
+        while True:
+            time.sleep(1)
+    finally:
+        observer.stop()
+        observer.join()
+
+
 def main():
     """Main program for mo-process-script-scans."""
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--version', action='version',
                         version='%(prog)s ' + matholymp.__version__)
-    parser.add_argument('files', nargs='*', help='list of input PDFs')
+    parser.add_argument('--watch', action='store_true',
+                        help='watch directory for new PDFs')
+    parser.add_argument('files', nargs='*',
+                        help='input directory or list of input PDFs')
     args = vars(parser.parse_args())
+    if args['watch'] and len(args['files']) != 1:
+        raise ValueError('--watch must be used with a single directory')
 
     top_directory = os.getcwd()
     cfg_data = _read_scans_config(top_directory)
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        for scan in args['files']:
-            executor.submit(_process_one_scan, scan, cfg_data)
+        if args['watch']:
+            _do_watch(executor, cfg_data, args['files'][0])
+        else:
+            for scan in args['files']:
+                executor.submit(_process_one_scan, scan, cfg_data)

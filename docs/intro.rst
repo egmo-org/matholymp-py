@@ -94,6 +94,10 @@ matholymp:
 * `ZBar <https://github.com/mchehab/zbar>` (used for automatic
   processing of scripts based on barcoded cover sheets).
 
+* `Watchdog <https://github.com/gorakhargosh/watchdog>` (used for
+  automatic processing of a queue of scripts with cover sheets
+  uploaded to the registration system).
+
 * `LaTeX <https://www.latex-project.org/>`_; specifically, the
   :command:`pdflatex` command (used in generating PDF documents from
   registration system data; not needed if that part of matholymp is
