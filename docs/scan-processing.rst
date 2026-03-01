@@ -31,9 +31,9 @@
 Scan processing
 ===============
 
-Matholymp has some partial support for processing scans of contestant
-scripts, using barcoded cover sheets to support automatically
-splitting up a PDF with scans of multiple scripts.
+Matholymp has some support for processing scans of contestant scripts,
+using barcoded cover sheets to support automatically splitting up a
+PDF with scans of multiple scripts.
 
 Matholymp provides a script :command:`mo-process-script-scans` to do
 this processing.  It expects to be run from a directory containing a
@@ -64,3 +64,9 @@ Symlinks to individual uploaded scans are automatically created in
 directory can be made available to coordinators through a web server
 to provide them with access to scans without needing a privileged
 registration system account.
+
+The process for uploading the PDFs with scans of multiple scripts
+depends on the scanning process and systems, but an example script (in
+which configuration settings need to be inserted) that uses the REST
+interface for such uploads is :download:`watch-upload.py
+<../examples/scan-processing/watch-upload.py>`.
