@@ -34,9 +34,9 @@
             
   <section id="scan-processing">
 <span id="id1"></span><h1>Scan processing<a class="headerlink" href="#scan-processing" title="Link to this heading">¶</a></h1>
-<p>Matholymp has some partial support for processing scans of contestant
-scripts, using barcoded cover sheets to support automatically
-splitting up a PDF with scans of multiple scripts.</p>
+<p>Matholymp has some support for processing scans of contestant scripts,
+using barcoded cover sheets to support automatically splitting up a
+PDF with scans of multiple scripts.</p>
 <p>Matholymp provides a script <strong class="command">mo-process-script-scans</strong> to do
 this processing.  It expects to be run from a directory containing a
 file <code class="file docutils literal notranslate"><span class="pre">scans.cfg</span></code> with associated configuration information.  The
@@ -63,6 +63,10 @@ upload scripts.</p>
 directory can be made available to coordinators through a web server
 to provide them with access to scans without needing a privileged
 registration system account.</p>
+<p>The process for uploading the PDFs with scans of multiple scripts
+depends on the scanning process and systems, but an example script (in
+which configuration settings need to be inserted) that uses the REST
+interface for such uploads is <a class="reference download internal" download="" href="../_downloads/cedf0895a43ac2de2f24d344102ad0af/watch-upload.py"><code class="xref download docutils literal notranslate"><span class="pre">watch-upload.py</span></code></a>.</p>
 </section>
 
 
