@@ -126,26 +126,30 @@ def _process_one_scan_main(scan, cfg_data, logfile):
     num_pages = len(in_reader.pages)
     logfile.write('Processing %s (%d pages)\n' % (scan, num_pages))
     with tempfile.TemporaryDirectory() as tmpdir:
-        _run_log(
-            ['pdftoppm', '-scale-to', str(cfg_data['resolution']), scan,
-             os.path.join(tmpdir, 'scan')],
-            logfile)
         page_digits = len(str(num_pages))
         scan_ppm_fmt = 'scan-%%0%dd.ppm' % page_digits
         cur_start = None
         cur_data = ()
         for n in range(num_pages):
             _run_log(
-                ['convert', os.path.join(tmpdir, scan_ppm_fmt % (n + 1)),
-                 '+repage', '-threshold', '%d%%' % cfg_data['threshold'],
-                 '-morphology', 'open', 'square:1',
-                 os.path.join(tmpdir, 'scan-%d.png' % (n + 1))],
+                ['pdftoppm', '-scale-to', str(cfg_data['resolution']),
+                 '-f', str(n + 1), '-l', str(n + 1), scan,
+                 os.path.join(tmpdir, 'scan')],
                 logfile)
+            scan_ppm = os.path.join(tmpdir, scan_ppm_fmt % (n + 1))
+            scan_png = os.path.join(tmpdir, 'scan-%d.png' % (n + 1))
+            _run_log(
+                ['convert', scan_ppm,
+                 '+repage', '-threshold', '%d%%' % cfg_data['threshold'],
+                 '-morphology', 'open', 'square:1', scan_png],
+                logfile)
+            os.remove(scan_ppm)
             results = _run_log(
                 ['zbarimg', '-q', '--xml', '-Sdisable', '-Sqrcode.enable',
                  os.path.join(tmpdir, 'scan-%d.png' % (n + 1))],
                 logfile,
                 check=False)
+            os.remove(scan_png)
             this_data = None
             if results.returncode == 4:
                 pass
