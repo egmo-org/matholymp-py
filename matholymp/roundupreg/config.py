@@ -48,12 +48,13 @@ __all__ = ['get_config_var', 'get_config_var_bool', 'get_config_var_int',
            'get_num_problems', 'get_problem_numbers', 'get_num_exams',
            'get_exam_numbers', 'get_script_scan_props_desc',
            'get_script_scan_props_code', 'get_script_scan_props',
-           'get_marks_per_problem', 'get_num_languages',
-           'get_language_numbers', 'get_num_future_contacts',
-           'get_future_contact_numbers', 'get_earliest_date_of_birth',
-           'get_sanity_date_of_birth', 'get_earliest_date_of_birth_contestant',
-           'get_age_day_date', 'get_arrdep_bounds', 'get_short_name',
-           'get_year', 'get_short_name_year', 'get_staff_country_name',
+           'get_marks_per_problem', 'get_num_contestants_per_team',
+           'get_num_languages', 'get_language_numbers',
+           'get_num_future_contacts', 'get_future_contact_numbers',
+           'get_earliest_date_of_birth', 'get_sanity_date_of_birth',
+           'get_earliest_date_of_birth_contestant', 'get_age_day_date',
+           'get_arrdep_bounds', 'get_short_name', 'get_year',
+           'get_short_name_year', 'get_staff_country_name',
            'invitation_letter_register', 'country_invitation_letter_register',
            'badge_use_background', 'honourable_mentions_available',
            'event_type', 'is_virtual_event', 'is_hybrid_event',
@@ -221,6 +222,11 @@ def get_marks_per_problem(db):
     marks_per_problem = get_config_var(db, 'MATHOLYMP_MARKS_PER_PROBLEM')
     marks_per_problem = marks_per_problem.split()
     return [int(m) for m in marks_per_problem]
+
+
+def get_num_contestants_per_team(db):
+    """Return the number of contestants per team at this event."""
+    return get_config_var_int(db, 'MATHOLYMP_NUM_CONTESTANTS_PER_TEAM')
 
 
 def get_num_languages(db):

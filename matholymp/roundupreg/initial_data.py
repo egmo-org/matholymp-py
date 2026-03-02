@@ -55,9 +55,10 @@
 """This module provides the Roundup initial data setup."""
 
 from matholymp.roundupreg.config import distinguish_official, \
-    get_staff_country_name, is_virtual_event, get_initial_languages, \
-    get_extra_admin_roles_secondaryok, get_initial_room_types, \
-    get_initial_room_types_non_contestant, get_initial_room_types_contestant
+    get_num_contestants_per_team, get_staff_country_name, is_virtual_event, \
+    get_initial_languages, get_extra_admin_roles_secondaryok, \
+    get_initial_room_types, get_initial_room_types_non_contestant, \
+    get_initial_room_types_contestant
 from matholymp.roundupreg.staticsite import static_site_event_group
 
 __all__ = ['init_data']
@@ -201,7 +202,7 @@ def init_data(env):
     props_most_admin['secondaryok'] = False
     props_most_admin['canguide'] = False
     matholymprole = db.getclass('matholymprole')
-    for i in range(int(db.config.ext['MATHOLYMP_NUM_CONTESTANTS_PER_TEAM'])):
+    for i in range(get_num_contestants_per_team(db)):
         rolename = 'Contestant %d' % (i + 1)
         matholymprole.create(name=rolename, isadmin=False, secondaryok=False,
                              canguide=False, badge_type=badge_type_contestant,

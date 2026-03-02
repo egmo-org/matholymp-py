@@ -46,9 +46,10 @@ from matholymp.roundupreg.config import have_consent_forms, have_id_scans, \
     have_consent_ui, have_passport_numbers, have_nationality, require_diet, \
     require_dob, get_num_problems, get_script_scan_props, \
     get_future_contact_numbers, get_marks_per_problem, \
-    get_earliest_date_of_birth, get_sanity_date_of_birth, \
-    get_earliest_date_of_birth_contestant, get_arrdep_bounds, \
-    get_short_name_year, get_contestant_genders, get_invitation_letter_email
+    get_num_contestants_per_team, get_earliest_date_of_birth, \
+    get_sanity_date_of_birth, get_earliest_date_of_birth_contestant, \
+    get_arrdep_bounds, get_short_name_year, get_contestant_genders, \
+    get_invitation_letter_email
 from matholymp.roundupreg.roundupemail import send_email
 from matholymp.roundupreg.rounduputil import any_scores_missing, \
     valid_int_str, create_rss, db_file_format_contents, db_file_extension, \
@@ -207,8 +208,7 @@ def audit_country_fields(db, cl, nodeid, newvalues):
     if is_normal:
         exp_leaders = 1
         exp_deputies = 1
-        exp_contestants = int(
-            db.config.ext['MATHOLYMP_NUM_CONTESTANTS_PER_TEAM'])
+        exp_contestants = get_num_contestants_per_team(db)
         max_obs = None
     else:
         exp_leaders = 0
