@@ -107,7 +107,7 @@ dir_to_watch = input('Directory to watch: ')
 with concurrent.futures.ThreadPoolExecutor() as executor:
     handler = QueueScanEventHandler(executor)
     observer = Observer()
-    observer.schedule(handler, dir_to_watch)
+    observer.schedule(handler, dir_to_watch, recursive=True)
     observer.start()
     # Files already present at startup do not generate events, so make
     # sure to handle them; the use of locks ensures a file created
