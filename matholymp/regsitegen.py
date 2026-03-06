@@ -550,6 +550,67 @@ class RegSiteGenerator(SiteGenerator):
 
         return text
 
+    def script_status_text(self, num_contestants_per_team):
+        """Return the text of the script scans status page."""
+        e = self.event
+        countries = sorted(e.country_with_contestants_list,
+                           key=lambda x: x.sort_key)
+        people = []
+        for c in countries:
+            c_people = []
+            for n in range(num_contestants_per_team):
+                code = '%s%d' % (c.code, n + 1)
+                c_people.append(e.contestant_map.get(code, None))
+            people.append(c_people)
+        text = ''
+        for n in range(e.num_problems):
+            text += '\n<h2>Problem %d</h2>\n' % (n + 1)
+            num_present = 0
+            num_absent = 0
+            row_list = []
+            for c in people:
+                this_row = []
+                for p in c:
+                    if p is None:
+                        this_row.append('')
+                        continue
+                    code = p.contestant_code
+                    url = p.script_scan_urls[n]
+                    if url:
+                        this_row.append(self.html_a(html.escape(code), url))
+                        num_present += 1
+                    else:
+                        this_row.append('%s pending' % html.escape(code))
+                        num_absent += 1
+                row_list.append(self.html_tr_td_list(this_row))
+            text += ('<p>%d present, %d pending.</p>\n'
+                     % (num_present, num_absent))
+            text += self.html_table_list(row_list)
+        for n in range(e.num_exams):
+            text += '\n<h2>Scratch Day %d</h2>\n' % (n + 1)
+            num_present = 0
+            num_absent = 0
+            row_list = []
+            for c in people:
+                this_row = []
+                for p in c:
+                    if p is None:
+                        this_row.append('')
+                        continue
+                    code = p.contestant_code
+                    url = p.scratch_scan_urls[n]
+                    if url:
+                        this_row.append(self.html_a(html.escape(code), url))
+                        num_present += 1
+                    else:
+                        this_row.append('%s pending' % html.escape(code))
+                        num_absent += 1
+                row_list.append(self.html_tr_td_list(this_row))
+            text += ('<p>%d present, %d pending.</p>\n'
+                     % (num_present, num_absent))
+            text += self.html_table_list(row_list)
+        return text
+
     def room_edit_field(self, p):
         """Return a form field to edit a person's room number."""
         raise NotImplementedError

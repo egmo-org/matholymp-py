@@ -135,14 +135,14 @@ Next version (unreleased)
   registration system has a new configuration variable
   ``matholymp_num_exams``.  New files :file:`queue_scan.index.html`,
   :file:`queue_scan.item.html`, :file:`script.index.html`,
-  :file:`script.item.html` and :file:`script.manage.html` are added;
-  :file:`page.html` and :file:`person.item.html` are changed.
-  Document generation has new configuration variables
-  ``cover_sheet_key_file`` and ``problems_per_exam``.  Document
-  generation now requires `python-qrcode
-  <https://github.com/lincolnloop/python-qrcode>`_ (and thus that is
-  also required when using the registration system since that imports
-  the document generation code).  The new
+  :file:`script.item.html`, :file:`script.manage.html` and
+  :file:`script.status.html` are added; :file:`page.html` and
+  :file:`person.item.html` are changed.  Document generation has new
+  configuration variables ``cover_sheet_key_file`` and
+  ``problems_per_exam``.  Document generation now requires
+  `python-qrcode <https://github.com/lincolnloop/python-qrcode>`_ (and
+  thus that is also required when using the registration system since
+  that imports the document generation code).  The new
   :command:`mo-process-script-scans` script has several other
   dependencies.
 

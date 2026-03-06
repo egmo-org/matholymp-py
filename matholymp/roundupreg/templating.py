@@ -38,8 +38,9 @@ __all__ = ['people_from_country_internal', 'people_from_country',
            'scoreboard_gen', 'scoreboard', 'display_scoreboard',
            'has_nonempty_travel', 'show_travel_copy_options',
            'country_travel_copy_options', 'person_case_warning',
-           'registration_status', 'registration_status_country', 'edit_rooms',
-           'show_consent_form_ui', 'country_participation_type_select',
+           'registration_status', 'registration_status_country',
+           'script_status', 'edit_rooms', 'show_consent_form_ui',
+           'country_participation_type_select',
            'person_participation_type_select', 'yes_no_no_answer_select',
            'has_consent_for_photo', 'string_select', 'date_of_birth_select',
            'arrdep_date_select', 'arrdep_time_select', 'photo_consent_select',
@@ -68,7 +69,8 @@ from matholymp.roundupreg.cache import cached_text
 from matholymp.roundupreg.config import distinguish_official, \
     get_consent_forms_date, have_consent_forms, have_id_scans, \
     have_consent_ui, have_passport_numbers, have_nationality, require_diet, \
-    require_dob, get_problem_numbers, get_exam_numbers, get_language_numbers, \
+    require_dob, get_problem_numbers, get_exam_numbers, \
+    get_num_contestants_per_team, get_language_numbers, \
     get_future_contact_numbers, get_earliest_date_of_birth, \
     get_sanity_date_of_birth, get_arrdep_bounds, is_virtual_event, \
     is_hybrid_event, have_remote_participation
@@ -283,6 +285,12 @@ def registration_status_country(db, country):
     c = sitegen.event.country_map[int(country)]
     return sitegen.registration_status_country_text(
         c, consent_forms_date, have_id_scans(db), have_consent_ui(db))
+
+
+def script_status(db):
+    """Produce script scans status page contents."""
+    sitegen = RoundupSiteGenerator(db)
+    return sitegen.script_status_text(get_num_contestants_per_team(db))
 
 
 def edit_rooms(db):
@@ -741,6 +749,7 @@ def register_templating_utils(instance):
     instance.registerUtil('registration_status', registration_status)
     instance.registerUtil('registration_status_country',
                           registration_status_country)
+    instance.registerUtil('script_status', script_status)
     instance.registerUtil('edit_rooms', edit_rooms)
     instance.registerUtil('show_consent_form_ui', show_consent_form_ui)
     instance.registerUtil('has_consent_for_photo', has_consent_for_photo)

@@ -1103,7 +1103,8 @@ class RegSystemTestCase(unittest.TestCase):
                             'person.rooms.html',
                             'person.scoreenter.html',
                             'person.scoreselect.html',
-                            'script.manage.html'}
+                            'script.manage.html',
+                            'script.status.html'}
         self.all_templates_test(session, forbid_classes=forbid_classes,
                                 forbid_templates=forbid_templates,
                                 allow_templates=set(),
