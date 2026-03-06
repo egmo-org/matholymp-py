@@ -5,10 +5,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Release notes &#8212; matholymp 2026.02.0.dev0 documentation</title>
+    <title>Release notes &#8212; matholymp 2026.03.0.dev0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
-    <script src="../_static/documentation_options.js?v=16d69376"></script>
+    <script src="../_static/documentation_options.js?v=3a85154f"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex/" />
@@ -123,13 +123,14 @@ later, and requires 1.7.0 or later.</p></li>
 registration system has a new configuration variable
 <code class="docutils literal notranslate"><span class="pre">matholymp_num_exams</span></code>.  New files <code class="file docutils literal notranslate"><span class="pre">queue_scan.index.html</span></code>,
 <code class="file docutils literal notranslate"><span class="pre">queue_scan.item.html</span></code>, <code class="file docutils literal notranslate"><span class="pre">script.index.html</span></code>,
-<code class="file docutils literal notranslate"><span class="pre">script.item.html</span></code> and <code class="file docutils literal notranslate"><span class="pre">script.manage.html</span></code> are added;
-<code class="file docutils literal notranslate"><span class="pre">page.html</span></code> and <code class="file docutils literal notranslate"><span class="pre">person.item.html</span></code> are changed.
-Document generation has new configuration variables
-<code class="docutils literal notranslate"><span class="pre">cover_sheet_key_file</span></code> and <code class="docutils literal notranslate"><span class="pre">problems_per_exam</span></code>.  Document
-generation now requires <a class="reference external" href="https://github.com/lincolnloop/python-qrcode">python-qrcode</a> (and thus that is
-also required when using the registration system since that imports
-the document generation code).  The new
+<code class="file docutils literal notranslate"><span class="pre">script.item.html</span></code>, <code class="file docutils literal notranslate"><span class="pre">script.manage.html</span></code> and
+<code class="file docutils literal notranslate"><span class="pre">script.status.html</span></code> are added; <code class="file docutils literal notranslate"><span class="pre">page.html</span></code> and
+<code class="file docutils literal notranslate"><span class="pre">person.item.html</span></code> are changed.  Document generation has new
+configuration variables <code class="docutils literal notranslate"><span class="pre">cover_sheet_key_file</span></code> and
+<code class="docutils literal notranslate"><span class="pre">problems_per_exam</span></code>.  Document generation now requires
+<a class="reference external" href="https://github.com/lincolnloop/python-qrcode">python-qrcode</a> (and
+thus that is also required when using the registration system since
+that imports the document generation code).  The new
 <strong class="command">mo-process-script-scans</strong> script has several other
 dependencies.</p></li>
 <li><p>The primary source for the software is now <a class="reference external" href="https://github.com/egmo-org/matholymp-py">on GitHub</a>.</p></li>
