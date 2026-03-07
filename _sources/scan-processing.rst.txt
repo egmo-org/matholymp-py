@@ -69,4 +69,7 @@ The process for uploading the PDFs with scans of multiple scripts
 depends on the scanning process and systems, but an example script (in
 which configuration settings need to be inserted) that uses the REST
 interface for such uploads is :download:`watch-upload.py
-<../examples/scan-processing/watch-upload.py>`.
+<../examples/scan-processing/watch-upload.py>`.  A simpler version,
+that only uploads PDFs from a given directory in which all required
+PDFs exist at startup, without watching for new scans to appear, is
+:download:`upload.py <../examples/scan-processing/upload.py>`.
