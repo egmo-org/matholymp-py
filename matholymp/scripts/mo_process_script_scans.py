@@ -245,7 +245,8 @@ def _do_watch(executor, cfg_data, dir_to_watch):
     # sure to handle them; the use of locks ensures a file created
     # just after the watch starts is only processed once.
     for f in os.scandir(dir_to_watch):
-        _maybe_process_scan_from_watch(executor, cfg_data, f.path)
+        if f.path.endswith('.pdf'):
+            _maybe_process_scan_from_watch(executor, cfg_data, f.path)
     try:
         while True:
             time.sleep(1)
