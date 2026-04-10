@@ -637,7 +637,9 @@ class DocumentGenerator:
         remove_if_exists(cache_pdf_name)
         remove_if_exists(cache_tex_name)
         make_dirs_for_file(cache_pdf_name)
-        tex_text = read_text_from_file(papers_dir_tex_name)
+        with open(papers_dir_tex_name, 'r', encoding='utf-8',
+                  errors='surrogateescape') as in_file:
+            tex_text = in_file.read()
         latex_prog = self.latex_prog_from_text(tex_text)
         self.pdflatex_file(tex_file_name, latex_prog=latex_prog)
         self.pdflatex_cleanup(os.path.join(self._out_dir, lang_filename_day))
