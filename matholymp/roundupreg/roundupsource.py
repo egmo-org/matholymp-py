@@ -39,12 +39,12 @@ from matholymp.fileutil import comma_split
 from matholymp.roundupreg.config import distinguish_official, \
     have_consent_forms, have_id_scans, have_consent_ui, \
     have_passport_numbers, have_nationality, get_num_problems, \
-    get_problem_numbers, get_num_exams, get_exam_numbers, \
+    get_problem_numbers, get_score_props, get_num_exams, get_exam_numbers, \
     get_marks_per_problem, get_language_numbers, get_future_contact_numbers, \
     get_short_name, honourable_mentions_available, event_type, \
     have_remote_participation
-from matholymp.roundupreg.rounduputil import scores_from_str, \
-    person_date_of_birth, contestant_age, db_file_url, person_is_remote
+from matholymp.roundupreg.rounduputil import person_date_of_birth, \
+    contestant_age, db_file_url, person_is_remote
 
 __all__ = ['RoundupDataSource']
 
@@ -166,15 +166,10 @@ class RoundupDataSource(DataSource):
         elif name == 'family_name':
             return self._db.person.get(person_id, 'family_name')
         elif name == 'problem_scores':
-            score_str = self._db.person.get(person_id, 'scores')
-            scores = scores_from_str(self._db, score_str)
             r = []
-            for s in scores:
-                if s == '':
-                    s = None
-                else:
-                    s = int(s)
-                r.append(s)
+            for prop in get_score_props(self._db):
+                s = self._db.person.get(person_id, prop)
+                r.append(int(s) if s else None)
             return r
         elif name == 'extra_awards':
             extra_awards_str = self._db.person.get(person_id, 'extra_awards')

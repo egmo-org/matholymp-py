@@ -47,6 +47,10 @@ so, run :command:`mo-static-generate`.
 Next version (unreleased)
 -------------------------
 
+Because of changes to how data is represented in the registration
+system, upgrades to this version can only be made between events when
+the registration system is not active.
+
 * For a virtual event, the registration system does not request
   information about nationality, passport number, name as on passport,
   allergies and dietary requirements, travel, room type or person with

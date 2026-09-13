@@ -38,35 +38,15 @@ import time
 
 from matholymp.datetimeutil import date_from_ymd_str, age_on_date
 from matholymp.fileutil import file_format_contents, file_extension
-from matholymp.roundupreg.config import get_num_problems, get_age_day_date, \
-    event_type
+from matholymp.roundupreg.config import get_num_problems, get_score_props, \
+    get_age_day_date, event_type
 
-__all__ = ['scores_from_str', 'person_date_of_birth', 'contestant_age',
-           'person_is_contestant', 'contestant_code', 'pn_score',
-           'scores_final', 'any_scores_missing', 'country_has_contestants',
-           'valid_country_problem', 'valid_int_str', 'create_rss',
-           'db_file_format_contents', 'db_file_extension', 'db_file_url',
-           'country_from_code', 'person_is_remote', 'registration_enabled',
-           'show_scores']
-
-
-def scores_from_str(db, score_str):
-    """
-    Return a list of the scores (strings) for a contestant, given the
-    string for their scores stored in the database.
-    """
-    num_problems = get_num_problems(db)
-    scores = score_str.split(',')
-    # Allow for the number of problems changing after registration started.
-    if len(scores) < num_problems:
-        scores.extend(['' for i in range(num_problems - len(scores))])
-    elif len(scores) > num_problems:
-        for i in range(num_problems, len(scores)):
-            if scores[i] != '':
-                raise ValueError('number of problems reduced after'
-                                 ' scores entered: %s' % scores[i])
-        scores = scores[0:num_problems]
-    return scores
+__all__ = ['person_date_of_birth', 'contestant_age', 'person_is_contestant',
+           'contestant_code', 'pn_score', 'scores_final', 'any_scores_missing',
+           'country_has_contestants', 'valid_country_problem', 'valid_int_str',
+           'create_rss', 'db_file_format_contents', 'db_file_extension',
+           'db_file_url', 'country_from_code', 'person_is_remote',
+           'registration_enabled', 'show_scores']
 
 
 def person_date_of_birth(db, person):
@@ -103,10 +83,9 @@ def contestant_code(db, person):
 
 
 def pn_score(db, person, n):
-    """Determine the score of a contestant on a given problem."""
-    score_str = db.person.get(person, 'scores')
-    scores = scores_from_str(db, score_str)
-    return scores[n - 1]
+    """Determine the score (a string) of a contestant on a given problem."""
+    score_str = db.person.get(person, 'score_p%d' % n)
+    return score_str if score_str else ''
 
 
 def scores_final(db):
@@ -121,13 +100,11 @@ def scores_final(db):
 def any_scores_missing(db):
     """Determine whether any scores have yet to be entered."""
     person_list = db.person.list()
-    num_problems = get_num_problems(db)
+    score_props = get_score_props(db)
     for person in person_list:
         if person_is_contestant(db, person):
-            score_str = db.person.get(person, 'scores')
-            scores = scores_from_str(db, score_str)
-            for i in range(num_problems):
-                if scores[i] == '':
+            for prop in score_props:
+                if not db.person.get(person, prop):
                     return True
     return False
 

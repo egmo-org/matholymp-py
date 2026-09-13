@@ -44,7 +44,7 @@ from matholymp.fileutil import read_text_from_file, file_format_contents, \
 from matholymp.roundupreg.auditorutil import get_new_value, require_value
 from matholymp.roundupreg.config import have_consent_forms, have_id_scans, \
     have_consent_ui, have_passport_numbers, have_nationality, require_diet, \
-    require_dob, get_num_problems, get_script_scan_props, \
+    require_dob, get_score_props, get_script_scan_props, \
     get_future_contact_numbers, get_marks_per_problem, \
     get_num_contestants_per_team, get_earliest_date_of_birth, \
     get_sanity_date_of_birth, get_earliest_date_of_birth_contestant, \
@@ -373,7 +373,12 @@ def audit_person_fields(db, cl, nodeid, newvalues):
     # This auditor is called for the score action as well as for the
     # edit and create actions.
     if nodeid is not None and db.security.hasPermission('Score', userid):
-        if list(newvalues.keys()) == ['scores']:
+        score_props = get_score_props(db)
+        have_non_score_props = False
+        for p in newvalues.keys():
+            if p not in score_props:
+                have_non_score_props = True
+        if not have_non_score_props:
             # All required checks on scores were done in the score
             # action; the Score role does not provide access to the
             # edit action.  Scoring users need to be able to enter
@@ -606,14 +611,6 @@ def audit_person_fields(db, cl, nodeid, newvalues):
         # country; we treat that specified for the country as a just a
         # statement of intent rather than required to be consistent
         # with that for individual participants.
-
-    # Start with blank scores for contestants - and for other people
-    # in case someone is first registered with another role then
-    # changed to a contestant.
-    if nodeid is None:
-        num_problems = get_num_problems(db)
-        scores_list = ['' for i in range(num_problems)]
-        newvalues['scores'] = ','.join(scores_list)
 
     # Sanity check arrival and departure dates and times.
     arr_date, arr_time = audit_person_arrdep(db, cl, nodeid, newvalues,

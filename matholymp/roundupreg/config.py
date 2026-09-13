@@ -45,8 +45,8 @@ __all__ = ['get_config_var', 'get_config_var_bool', 'get_config_var_int',
            'have_id_scans',
            'have_consent_forms', 'have_consent_ui', 'have_passport_numbers',
            'have_nationality', 'require_diet', 'require_dob',
-           'get_num_problems', 'get_problem_numbers', 'get_num_exams',
-           'get_exam_numbers', 'get_script_scan_props_desc',
+           'get_num_problems', 'get_problem_numbers', 'get_score_props',
+           'get_num_exams', 'get_exam_numbers', 'get_script_scan_props_desc',
            'get_script_scan_props_code', 'get_script_scan_props',
            'get_marks_per_problem', 'get_num_contestants_per_team',
            'get_num_languages', 'get_language_numbers',
@@ -180,6 +180,11 @@ def get_num_problems(db):
 def get_problem_numbers(db):
     """Return the range of numbers of problems at this event."""
     return range(1, get_num_problems(db) + 1)
+
+
+def get_score_props(db):
+    """Return the person properties for scores."""
+    return ['score_p%d' % i for i in get_problem_numbers(db)]
 
 
 def get_num_exams(db):

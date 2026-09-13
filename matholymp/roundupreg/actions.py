@@ -71,10 +71,9 @@ from matholymp.roundupreg.config import distinguish_official, \
 from matholymp.roundupreg.roundupemail import send_email
 from matholymp.roundupreg.roundupsitegen import RoundupSiteGenerator
 from matholymp.roundupreg.roundupsource import RoundupDataSource
-from matholymp.roundupreg.rounduputil import scores_from_str, \
-    person_is_contestant, contestant_code, scores_final, \
-    valid_country_problem, valid_int_str, create_rss, country_from_code, \
-    person_is_remote, show_scores
+from matholymp.roundupreg.rounduputil import person_is_contestant, \
+    contestant_code, scores_final, valid_country_problem, valid_int_str, \
+    create_rss, country_from_code, person_is_remote, show_scores
 from matholymp.roundupreg.userauditor import valid_address
 
 
@@ -124,11 +123,9 @@ class ScoreAction(Action):
                 score = self.form[code].value
                 if score != '' and not valid_int_str(score, max_this_problem):
                     raise ValueError('Invalid score specified for ' + code)
-                score_str = self.db.person.get(person, 'scores')
-                scores = scores_from_str(self.db, score_str)
-                scores[problem_number - 1] = score
-                new_scores = ','.join(scores)
-                self.db.person.set(person, scores=new_scores)
+                score_props = {'score_p%d' % problem_number:
+                               score if score else None}
+                self.db.person.set(person, **score_props)
                 results_text = code + ' = ' + score
                 if score == '':
                     results_text += '?'

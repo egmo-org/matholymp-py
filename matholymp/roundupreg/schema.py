@@ -56,8 +56,8 @@
 
 from matholymp.roundupreg.config import distinguish_official, \
     have_consent_forms, have_id_scans, have_consent_ui, \
-    have_passport_numbers, have_nationality, get_script_scan_props, \
-    get_language_numbers, get_future_contact_numbers, \
+    have_passport_numbers, have_nationality, get_score_props, \
+    get_script_scan_props, get_language_numbers, get_future_contact_numbers, \
     invitation_letter_register, country_invitation_letter_register, \
     is_virtual_event, have_remote_participation, allow_hybrid_countries
 from matholymp.roundupreg.rounduputil import person_is_contestant, show_scores
@@ -201,6 +201,9 @@ def init_schema(env):
         person_extra['participation_type'] = String()
     for i in get_language_numbers(db):
         person_extra['language_%d' % i] = Link('language')
+    score_props = get_score_props(db)
+    for prop in score_props:
+        person_extra[prop] = String()
     script_scan_props = get_script_scan_props(db)
     for prop in script_scan_props:
         person_extra[prop] = Link('script')
@@ -236,8 +239,6 @@ def init_schema(env):
                    photo=Link('photo'),
                    incomplete=Boolean(),
                    invitation_letter_generated=Boolean(),
-                   # Comma-separated scores on each problem.
-                   scores=String(),
                    extra_awards=String(),
                    **person_extra)
     person.setorderprop('primary_role')
@@ -465,7 +466,7 @@ def init_schema(env):
     db.security.addPermissionToRole('Anonymous', p)
     p = db.security.addPermission(name='View', klass='person',
                                   check=can_view_scores,
-                                  properties=('scores',))
+                                  properties=score_props)
     db.security.addPermissionToRole('User', p)
     db.security.addPermissionToRole('Anonymous', p)
     p = db.security.addPermission(name='View', klass='photo',
