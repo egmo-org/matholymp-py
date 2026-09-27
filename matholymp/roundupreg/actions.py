@@ -246,7 +246,7 @@ class ScoresCSVAction(Action):
             raise ValueError('This action only applies to people')
         if self.nodeid is not None:
             raise ValueError('Node id specified for CSV generation')
-        if not show_scores(self.db, self.db.getuid()):
+        if not show_scores(self.db, self.db.getuid(), None):
             raise Unauthorised('Scores are currently hidden')
         self.client.setHeader('Content-Type', 'text/csv; charset=UTF-8')
         self.client.setHeader('Content-Disposition',
@@ -269,7 +269,7 @@ class PeopleCSVAction(Action):
                               'attachment; filename=people.csv')
         show_all = self.hasPermission('Omnivident')
         return RoundupSiteGenerator(self.db).people_csv_bytes(
-            show_all, show_scores(self.db, self.db.getuid()))
+            show_all, show_scores(self.db, self.db.getuid(), None))
 
 
 class MedalBoundariesCSVAction(Action):
@@ -429,7 +429,7 @@ class ScoresRSSAction(Action):
         """Output the RSS feed for scores."""
         if self.classname != 'country':
             raise ValueError('This action only applies to countries')
-        if not show_scores(self.db, self.db.getuid()):
+        if not show_scores(self.db, self.db.getuid(), self.nodeid):
             raise Unauthorised('Scores are currently hidden')
 
         self.client.setHeader('Content-Type', 'application/rss+xml')

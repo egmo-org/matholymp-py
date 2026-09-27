@@ -246,8 +246,13 @@ def registration_enabled(db, userid):
             or db.event.get('1', 'registration_enabled'))
 
 
-def show_scores(db, userid):
+def show_scores(db, userid, country):
     """Determine whether scores are displayed."""
-    return (db.security.hasPermission('ViewScores', userid)
+    if country is None:
+        perm = db.security.hasPermission('ViewScores', userid)
+    else:
+        perm = db.security.hasPermission(
+            'ViewCountryScores', userid, classname='country', itemid=country)
+    return (perm
             or not db.event.get('1', 'hide_scores_message')
             or scores_final(db))

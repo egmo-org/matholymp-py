@@ -21,7 +21,7 @@
 
 <tal:block tal:condition="context/is_view_ok">
 
-<tal:block tal:condition="python:utils.show_scores(db._db, request.user.id)">
+<tal:block tal:condition="python:utils.show_scores(db._db, request.user.id, None)">
 
 <p tal:condition="context/is_view_ok">The table of scores may also
   be <a href="person?@action=scores_csv">downloaded in UTF-8 CSV
@@ -32,7 +32,7 @@
 
 </tal:block>
 
-<tal:block tal:condition="python:not utils.show_scores(db._db, request.user.id)">
+<tal:block tal:condition="python:not utils.show_scores(db._db, request.user.id, None)">
 <p><strong><tal:block tal:replace="python:db._db.event.get('1', 'hide_scores_message')" /></strong></p>
 </tal:block>
 

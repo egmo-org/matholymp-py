@@ -453,7 +453,7 @@ def init_schema(env):
     def can_view_scores(db, userid, itemid):
         """Determine whether this user can view scores for this person."""
         return (normal_can_view_person(db, userid, itemid)
-                and show_scores(db, userid))
+                and show_scores(db, userid, db.person.get(itemid, 'country')))
 
     p = db.security.addPermission(name='View', klass='person',
                                   check=normal_can_view_person,
@@ -788,3 +788,10 @@ def init_schema(env):
     db.security.addPermissionToRole('Score', p)
     db.security.addRole(name='ViewScores', description='Viewing scores')
     db.security.addPermissionToRole('ViewScores', p)
+    p = db.security.addPermission(name='ViewCountryScores')
+    db.security.addPermissionToRole('Admin', p)
+    db.security.addPermissionToRole('Score', p)
+    db.security.addPermissionToRole('ViewScores', p)
+    p = db.security.addPermission(name='ViewCountryScores',
+                                  klass='country', check=own_country)
+    db.security.addPermissionToRole('Leader', p)

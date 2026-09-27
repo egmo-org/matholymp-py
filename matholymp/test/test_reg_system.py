@@ -4871,6 +4871,16 @@ class RegSystemTestCase(unittest.TestCase):
         """
         session = self.get_session()
         admin_session = self.get_session('admin')
+        admin_session.create_country_generic()
+        admin_session.create_user(
+            'ABC_leader', 'Test First Country', 'User,Leader')
+        admin_session.create_country('DEF', 'Test Second Country')
+        admin_session.create_user(
+            'DEF_leader', 'Test Second Country', 'User,Leader')
+        reg_session = self.get_session('ABC_reg')
+        reg2_session = self.get_session('DEF_reg')
+        leader_session = self.get_session('ABC_leader')
+        leader2_session = self.get_session('DEF_leader')
         session.check_open_relative('person?@action=scores_rss',
                                     error='This action only applies '
                                     'to countries')
@@ -4896,6 +4906,46 @@ class RegSystemTestCase(unittest.TestCase):
         session.check_open_relative('country1?@action=scores_rss',
                                     error='Scores are currently hidden',
                                     status=403)
+        # Leader accounts can access scores from their own country,
+        # but not the full scoreboard or those from other countries
+        # while hidden; registering accounts cannot access scores
+        # while hidden.
+        reg_session.check_open_relative('country?@action=scores_rss',
+                                        error='Scores are currently hidden',
+                                        status=403)
+        reg2_session.check_open_relative('country?@action=scores_rss',
+                                         error='Scores are currently hidden',
+                                         status=403)
+        leader_session.check_open_relative('country?@action=scores_rss',
+                                           error='Scores are currently hidden',
+                                           status=403)
+        leader2_session.check_open_relative(
+            'country?@action=scores_rss',
+            error='Scores are currently hidden',
+            status=403)
+        reg_session.check_open_relative('country3?@action=scores_rss',
+                                        error='Scores are currently hidden',
+                                        status=403)
+        reg2_session.check_open_relative('country3?@action=scores_rss',
+                                         error='Scores are currently hidden',
+                                         status=403)
+        leader_session.check_get(
+            self.instance.url + 'country3?@action=scores_rss', html=False)
+        leader2_session.check_open_relative(
+            'country3?@action=scores_rss',
+            error='Scores are currently hidden',
+            status=403)
+        reg_session.check_open_relative('country4?@action=scores_rss',
+                                        error='Scores are currently hidden',
+                                        status=403)
+        reg2_session.check_open_relative('country4?@action=scores_rss',
+                                         error='Scores are currently hidden',
+                                         status=403)
+        leader_session.check_open_relative('country4?@action=scores_rss',
+                                           error='Scores are currently hidden',
+                                           status=403)
+        leader2_session.check_get(
+            self.instance.url + 'country4?@action=scores_rss', html=False)
 
     @_with_config(docgen_directory='docgen', require_passport_number='Yes',
                   require_nationality='Yes')
@@ -13162,6 +13212,10 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session.create_viewscores_user()
         viewscores_session = self.get_session('viewscores')
         admin_session.create_country_generic()
+        admin_session.create_user(
+            'ABC_leader', 'Test First Country', 'User,Leader')
+        reg_session = self.get_session('ABC_reg')
+        leader_session = self.get_session('ABC_leader')
         admin_session.create_person('Test First Country', 'Contestant 1')
         admin_session.create_person('Test First Country', 'Contestant 2')
         admin_session.create_person('Test First Country', 'Contestant 4')
@@ -13196,6 +13250,10 @@ class RegSystemTestCase(unittest.TestCase):
         anon_csv_p = session.get_people_csv_scores()
         score_csv = score_session.get_scores_csv()
         score_csv_p = score_session.get_people_csv_scores()
+        reg_csv = reg_session.get_scores_csv()
+        reg_csv_p = reg_session.get_people_csv_scores()
+        leader_csv = leader_session.get_scores_csv()
+        leader_csv_p = leader_session.get_people_csv_scores()
         self.assertEqual(admin_csv,
                          [{'Country Name': 'Test First Country',
                            'Country Code': 'ABC', 'Contestant Code': 'ABC1',
@@ -13238,6 +13296,10 @@ class RegSystemTestCase(unittest.TestCase):
         self.assertEqual(anon_csv_p, admin_csv)
         self.assertEqual(score_csv, admin_csv)
         self.assertEqual(score_csv_p, admin_csv)
+        self.assertEqual(reg_csv, admin_csv)
+        self.assertEqual(reg_csv_p, admin_csv)
+        self.assertEqual(leader_csv, admin_csv)
+        self.assertEqual(leader_csv_p, admin_csv)
         # Test a null edit of scores.
         admin_session.enter_scores('Test Second Country', 'DEF', '1',
                                    [])
@@ -13253,12 +13315,20 @@ class RegSystemTestCase(unittest.TestCase):
         anon_csv_p_2 = session.get_people_csv_scores()
         score_csv_2 = score_session.get_scores_csv()
         score_csv_p_2 = score_session.get_people_csv_scores()
+        reg_csv_2 = reg_session.get_scores_csv()
+        reg_csv_p_2 = reg_session.get_people_csv_scores()
+        leader_csv_2 = leader_session.get_scores_csv()
+        leader_csv_p_2 = leader_session.get_people_csv_scores()
         self.assertEqual(admin_csv_2, admin_csv)
         self.assertEqual(admin_csv_p_2, admin_csv)
         self.assertEqual(anon_csv_2, admin_csv)
         self.assertEqual(anon_csv_p_2, admin_csv)
         self.assertEqual(score_csv_2, admin_csv)
         self.assertEqual(score_csv_p_2, admin_csv)
+        self.assertEqual(reg_csv_2, admin_csv)
+        self.assertEqual(reg_csv_p_2, admin_csv)
+        self.assertEqual(leader_csv_2, admin_csv)
+        self.assertEqual(leader_csv_p_2, admin_csv)
         # Test an edit that changes some scores.
         admin_session.enter_scores('Test First Country', 'ABC', '2',
                                    ['', '5', None, '0'])
@@ -13270,6 +13340,10 @@ class RegSystemTestCase(unittest.TestCase):
         anon_csv_p = session.get_people_csv_scores()
         score_csv = score_session.get_scores_csv()
         score_csv_p = score_session.get_people_csv_scores()
+        reg_csv = reg_session.get_scores_csv()
+        reg_csv_p = reg_session.get_people_csv_scores()
+        leader_csv = leader_session.get_scores_csv()
+        leader_csv_p = leader_session.get_people_csv_scores()
         self.assertEqual(admin_csv,
                          [{'Country Name': 'Test First Country',
                            'Country Code': 'ABC', 'Contestant Code': 'ABC1',
@@ -13312,6 +13386,10 @@ class RegSystemTestCase(unittest.TestCase):
         self.assertEqual(anon_csv_p, admin_csv)
         self.assertEqual(score_csv, admin_csv)
         self.assertEqual(score_csv_p, admin_csv)
+        self.assertEqual(reg_csv, admin_csv)
+        self.assertEqual(reg_csv_p, admin_csv)
+        self.assertEqual(leader_csv, admin_csv)
+        self.assertEqual(leader_csv_p, admin_csv)
         # Test hiding scores.
         admin_session.edit('event', '1',
                            {'hide_scores_message': 'Testing hiding scores.'})
@@ -13331,6 +13409,12 @@ class RegSystemTestCase(unittest.TestCase):
         session.check_open(scores_csv_url,
                            error='Scores are currently hidden',
                            status=403)
+        reg_session.check_open(scores_csv_url,
+                               error='Scores are currently hidden',
+                               status=403)
+        leader_session.check_open(scores_csv_url,
+                                  error='Scores are currently hidden',
+                                  status=403)
         anon_csv_p_2 = session.get_people_csv_scores()
         self.assertEqual(
             anon_csv_p_2,
@@ -13352,6 +13436,10 @@ class RegSystemTestCase(unittest.TestCase):
              {'Country Name': 'Test Second Country',
               'Country Code': 'DEF', 'Contestant Code': 'DEF4',
               'Given Name': 'Given 6', 'Family Name': 'Family 6'}])
+        reg_csv_p_2 = reg_session.get_people_csv_scores()
+        self.assertEqual(reg_csv_p_2, anon_csv_p_2)
+        leader_csv_p_2 = leader_session.get_people_csv_scores()
+        self.assertEqual(leader_csv_p_2, anon_csv_p_2)
 
     @_with_config(event_type='virtual')
     def test_person_score_virtual(self):
