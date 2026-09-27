@@ -612,9 +612,15 @@ def init_schema(env):
                     break
         return found
 
+    db.security.addRole(name='Leader', description='Country leader')
     p = db.security.addPermission(name='View', klass='script',
                                   check=own_country_script)
     db.security.addPermissionToRole('Register', p)
+    db.security.addPermissionToRole('Leader', p)
+    p = db.security.addPermission(name='View', klass='person',
+                                  check=own_country_person,
+                                  properties=script_scan_props)
+    db.security.addPermissionToRole('Leader', p)
 
     def own_country(db, userid, itemid):
         """Determine whether the userid matches the country being accessed."""

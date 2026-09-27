@@ -1120,6 +1120,36 @@ class RegSystemTestCase(unittest.TestCase):
                                 allow_templates=set(),
                                 can_score=False, admin_user=False)
 
+    def test_all_templates_leader(self):
+        """
+        Test that all page templates load without errors, for a leader user.
+        """
+        admin_session = self.get_session('admin')
+        admin_session.create_country_generic()
+        admin_session.create_user(
+            'ABC_leader', 'Test First Country', 'User,Leader')
+        session = self.get_session('ABC_leader')
+        forbid_classes = {'event', 'rss', 'arrival', 'badge_type',
+                          'consent_form', 'id_scan', 'gender', 'language',
+                          'queue_scan', 'room_type', 'tshirt'}
+        forbid_templates = {'country.bulkconfirm.html',
+                            'country.bulkregister.html',
+                            'country.prereg.html',
+                            'country.retireconfirm.html',
+                            'person.bulkconfirm.html',
+                            'person.bulkregister.html',
+                            'person.retireconfirm.html',
+                            'person.rooms.html',
+                            'person.scoreenter.html',
+                            'person.scoreselect.html',
+                            'person.status.html',
+                            'script.manage.html',
+                            'script.status.html'}
+        self.all_templates_test(session, forbid_classes=forbid_classes,
+                                forbid_templates=forbid_templates,
+                                allow_templates=set(),
+                                can_score=False, admin_user=False)
+
     def all_templates_item_test(self, admin_session, session, forbid_classes):
         """Test that all page templates for existing items load without
         errors."""
@@ -1209,6 +1239,24 @@ class RegSystemTestCase(unittest.TestCase):
         # so give errors.  user1 is another user, so gives an error.
         forbid_classes = {'badge_type', 'consent_form', 'id_scan', 'event',
                           'queue_scan', 'rss', 'script', 'user'}
+        self.all_templates_item_test(admin_session, session,
+                                     forbid_classes=forbid_classes)
+
+    def test_all_templates_item_leader(self):
+        """
+        Test that all page templates for existing items load without
+        errors, for a leader user.
+        """
+        admin_session = self.get_session('admin')
+        admin_session.create_country_generic()
+        admin_session.create_user(
+            'ABC_leader', 'Test First Country', 'User,Leader')
+        session = self.get_session('ABC_leader')
+        # script1 is for another country, so gives an error.
+        forbid_classes = {'event', 'rss', 'arrival', 'badge_type',
+                          'consent_form', 'id_scan', 'gender', 'language',
+                          'queue_scan', 'room_type', 'script', 'tshirt',
+                          'user'}
         self.all_templates_item_test(admin_session, session,
                                      forbid_classes=forbid_classes)
 
@@ -8644,9 +8692,15 @@ class RegSystemTestCase(unittest.TestCase):
         sc3_filename, sc3_bytes = self.gen_test_pdf()
         sc4_filename, sc4_bytes = self.gen_test_pdf()
         admin_session.create_country_generic()
+        admin_session.create_user(
+            'ABC_leader', 'Test First Country', 'User,Leader')
         admin_session.create_country('DEF', 'Test Second Country')
+        admin_session.create_user(
+            'DEF_leader', 'Test Second Country', 'User,Leader')
         reg_session = self.get_session('ABC_reg')
         reg2_session = self.get_session('DEF_reg')
+        leader_session = self.get_session('ABC_leader')
+        leader2_session = self.get_session('DEF_leader')
         admin_session.create_person('Test First Country', 'Contestant 1')
         admin_session.create_person('Test Second Country', 'Contestant 2')
         admin_csv = admin_session.get_people_csv()
@@ -8701,16 +8755,22 @@ class RegSystemTestCase(unittest.TestCase):
         # Check the script scan from the URL in the .csv file.
         admin_bytes = admin_session.get_bytes(sc1_url_csv)
         reg_bytes = reg_session.get_bytes(sc1_url_csv)
+        leader_bytes = leader_session.get_bytes(sc1_url_csv)
         self.assertEqual(admin_bytes, sc1_bytes)
         self.assertEqual(reg_bytes, sc1_bytes)
+        self.assertEqual(leader_bytes, sc1_bytes)
         # Check the scan is not accessible anonymously or by
-        # registering users from other countries.
+        # registering or leader users from other countries.
         session.check_open(sc1_url_csv,
                            error='You are not allowed to view this file',
                            status=403)
         reg2_session.check_open(sc1_url_csv,
                                 error='You are not allowed to view this file',
                                 status=403)
+        leader2_session.check_open(
+            sc1_url_csv,
+            error='You are not allowed to view this file',
+            status=403)
         # Test scans for another problem.
         admin_session.check_open_relative('script?@template=manage')
         admin_session.b.select_form(
@@ -8741,8 +8801,10 @@ class RegSystemTestCase(unittest.TestCase):
         # Check the script scan from the URL in the .csv file.
         admin_bytes = admin_session.get_bytes(sc3_url_csv)
         reg_bytes = reg_session.get_bytes(sc3_url_csv)
+        leader_bytes = leader_session.get_bytes(sc3_url_csv)
         self.assertEqual(admin_bytes, sc3_bytes)
         self.assertEqual(reg_bytes, sc3_bytes)
+        self.assertEqual(leader_bytes, sc3_bytes)
         # Test scans of scratch work.
         admin_session.check_open_relative('script?@template=manage')
         admin_session.b.select_form(
@@ -8774,8 +8836,10 @@ class RegSystemTestCase(unittest.TestCase):
         # Check the script scan from the URL in the .csv file.
         admin_bytes = admin_session.get_bytes(sc4_url_csv)
         reg_bytes = reg_session.get_bytes(sc4_url_csv)
+        leader_bytes = leader_session.get_bytes(sc4_url_csv)
         self.assertEqual(admin_bytes, sc4_bytes)
         self.assertEqual(reg_bytes, sc4_bytes)
+        self.assertEqual(leader_bytes, sc4_bytes)
         # Check the symlink is updated when replacing a scan.
         admin_session.check_open_relative('script?@template=manage')
         admin_session.b.select_form(
@@ -8795,7 +8859,10 @@ class RegSystemTestCase(unittest.TestCase):
         sc1_filename, dummy = self.gen_test_pdf()
         scpng_filename, dummy = self.gen_test_image(2, 2, 2, '.png', 'PNG')
         admin_session.create_country_generic()
+        admin_session.create_user(
+            'ABC_leader', 'Test First Country', 'User,Leader')
         reg_session = self.get_session('ABC_reg')
+        leader_session = self.get_session('ABC_leader')
         admin_session.create_person('Test First Country', 'Contestant 1')
         admin_csv = admin_session.get_people_csv()
         admin_csv[0] = {'Script Scan P1 URL':
@@ -8853,6 +8920,25 @@ class RegSystemTestCase(unittest.TestCase):
         reg_session.set({'script-1@content': sc1_filename})
         reg_session.b.new_control('text', '@link@script_scan_p1', 'script-1')
         reg_session.check_submit_selected(
+            error='You do not have permission to create script',
+            status=403)
+        admin_csv = admin_session.get_people_csv()
+        admin_csv[0] = {'Script Scan P1 URL':
+                        admin_csv[0]['Script Scan P1 URL'],
+                        'Generic Number': admin_csv[0]['Generic Number']}
+        self.assertEqual(admin_csv, [expected])
+        admin_session.edit('user', self.instance.userids['ABC_leader'],
+                           {'roles': 'Admin'})
+        leader_session.check_open_relative('person1')
+        leader_session.select_main_form()
+        leader_session.b.new_control('file', 'script-1@content',
+                                     open(os.devnull, 'rb'))
+        leader_session.set({'script-1@content': sc1_filename})
+        leader_session.b.new_control(
+            'text', '@link@script_scan_p1', 'script-1')
+        admin_session.edit('user', self.instance.userids['ABC_leader'],
+                           {'roles': 'User,Leader'})
+        leader_session.check_submit_selected(
             error='You do not have permission to create script',
             status=403)
         admin_csv = admin_session.get_people_csv()
