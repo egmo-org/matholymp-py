@@ -137,6 +137,15 @@ class DataSource:
         """
         return False
 
+    def country_get_attr(self, country_id, name):
+        """
+        Return the value of an attribute for a Country.  Possible
+        names are: future_contact_organisation,
+        future_contact_1_public, future_contact_emails,
+        future_contact_names.
+        """
+        raise NotImplementedError
+
     def country_event_get_attr(self, country_id, event_id, name):
         """
         Return the value of an attribute for a CountryEvent.  Possible
@@ -144,11 +153,9 @@ class DataSource:
         is_official, is_normal, contact_emails, expected_leaders,
         expected_deputies, expected_contestants, expected_observers_a,
         expected_observers_b, expected_observers_c,
-        expected_single_rooms, expected_numbers_confirmed, billing_address,
-        leader_email, physical_address, participation_type,
-        future_contact_organisation, future_contact_1_public,
-        future_contact_emails, future_contact_names, _person_ids, _guide_ids,
-        generic_id.
+        expected_single_rooms, expected_numbers_confirmed,
+        billing_address, leader_email, physical_address,
+        participation_type, _person_ids, _guide_ids, generic_id.
         """
         raise NotImplementedError
 

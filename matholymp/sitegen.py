@@ -2061,13 +2061,13 @@ class SiteGenerator:
             csv_out['Physical Address'] = c.physical_address or ''
             csv_out['Participation Type'] = c.participation_type or ''
             csv_out['Future Contact Organisation'] = (
-                c.future_contact_organisation or '')
+                c.country.future_contact_organisation or '')
             csv_out['Future Contact 1 Public'] = (
-                'Yes' if c.future_contact_1_public else 'No')
+                'Yes' if c.country.future_contact_1_public else 'No')
             csv_out['Future Contact Emails'] = comma_join(
-                c.future_contact_emails)
+                c.country.future_contact_emails)
             csv_out['Future Contact Names'] = comma_join(
-                [name or '' for name in c.future_contact_names])
+                [name or '' for name in c.country.future_contact_names])
         if not reg_system:
             if c.num_contestants:
                 csv_out['Contestants'] = str(c.num_contestants)

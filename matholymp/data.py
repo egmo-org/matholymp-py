@@ -1773,6 +1773,17 @@ class PersonEvent:
         """Sort key by contestant number for exams.""")
 
 
+class _CountryPropertyDS(_PropertyCached):
+
+    """Class for Country attributes that are computed by a DataSource."""
+
+    def __init__(self, name, doc):
+        def ds_get(obj):
+            ds = obj.event_group._ds
+            return ds.country_get_attr(obj.id, name)
+        super().__init__(name, ds_get, doc)
+
+
 class Country:
 
     """
@@ -1901,6 +1912,22 @@ class Country:
         event; None if official countries are not distinguished at
         that event.
         """)
+
+    future_contact_organisation = _CountryPropertyDS(
+        'future_contact_organisation',
+        """The future contact organisation for this country.""")
+
+    future_contact_1_public = _CountryPropertyDS(
+        'future_contact_1_public',
+        """Whether the first future contact for this country is public.""")
+
+    future_contact_emails = _CountryPropertyDS(
+        'future_contact_emails',
+        """The future contact email addresses for this country.""")
+
+    future_contact_names = _CountryPropertyDS(
+        'future_contact_names',
+        """The future contact names for this country.""")
 
     def _get_sort_key(self):
         return (coll_get_sort_key(self.code),
@@ -2099,31 +2126,6 @@ class CountryEvent:
         The type of participation for this country at this event
         ('in-person', 'hybrid', 'virtual' or None if unknown).
         """)
-
-    # All the future contact details should logically be associated
-    # with the Country not the CountryEvent but are currently
-    # associated with the CountryEvent for implementation convenient.
-
-    future_contact_organisation = _CountryEventPropertyDS(
-        'future_contact_organisation',
-        """The future contact organisation for this country at this event.""")
-
-    future_contact_1_public = _CountryEventPropertyDS(
-        'future_contact_1_public',
-        """
-        Whether the first future contact for this country at this
-        event is public.
-        """)
-
-    future_contact_emails = _CountryEventPropertyDS(
-        'future_contact_emails',
-        """
-        The future contact email addresses for this country at this event.
-        """)
-
-    future_contact_names = _CountryEventPropertyDS(
-        'future_contact_names',
-        """The future contact email names for this country at this event.""")
 
     def _get_person_list(self):
         ds = self.country.event_group._ds

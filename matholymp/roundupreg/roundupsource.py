@@ -407,14 +407,37 @@ class RoundupDataSource(DataSource):
             return self._db.person.get(person_id, 'departure_flight') or None
         raise KeyError(name)
 
+    def country_get_attr(self, country_id, name):
+        country_id = str(country_id)
+        if name in ('future_contact_organisation',
+                    'future_contact_1_public'):
+            return self._db.country.get(country_id, name)
+        elif name == 'future_contact_emails':
+            ret = []
+            for n in get_future_contact_numbers(self._db):
+                email = self._db.country.get(
+                    country_id, 'future_contact_email_%d' % n)
+                if email:
+                    ret.append(email)
+            return ret
+        elif name == 'future_contact_names':
+            ret = []
+            for n in get_future_contact_numbers(self._db):
+                email = self._db.country.get(
+                    country_id, 'future_contact_email_%d' % n)
+                if email:
+                    name = self._db.country.get(
+                        country_id, 'future_contact_name_%d' % n)
+                    ret.append(name)
+            return ret
+        raise KeyError(name)
+
     def country_event_get_attr(self, country_id, event_id, name):
         country_id = str(country_id)
         if name == 'annual_url':
             return self._db.config.TRACKER_WEB + 'country' + country_id
         elif name in ('code', 'name', 'expected_numbers_confirmed',
-                      'billing_address', 'leader_email',
-                      'future_contact_organisation',
-                      'future_contact_1_public'):
+                      'billing_address', 'leader_email'):
             return self._db.country.get(country_id, name)
         elif name == 'flag_url':
             flag_id = self._db.country.get(country_id, 'flag')
@@ -456,24 +479,6 @@ class RoundupDataSource(DataSource):
             if this_event_type in ('in-person', 'virtual'):
                 return this_event_type
             return self._db.country.get(country_id, 'participation_type')
-        elif name == 'future_contact_emails':
-            ret = []
-            for n in get_future_contact_numbers(self._db):
-                email = self._db.country.get(
-                    country_id, 'future_contact_email_%d' % n)
-                if email:
-                    ret.append(email)
-            return ret
-        elif name == 'future_contact_names':
-            ret = []
-            for n in get_future_contact_numbers(self._db):
-                email = self._db.country.get(
-                    country_id, 'future_contact_email_%d' % n)
-                if email:
-                    name = self._db.country.get(
-                        country_id, 'future_contact_name_%d' % n)
-                    ret.append(name)
-            return ret
         elif name == '_person_ids':
             person_list = self._db.person.filter(None, {'country': country_id})
             return [int(p) for p in person_list]
