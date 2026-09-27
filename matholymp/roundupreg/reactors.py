@@ -37,15 +37,11 @@ import os.path
 
 from pypdf import PdfReader
 
-import roundup.password
-
-from matholymp.fileutil import read_text_from_file
 from matholymp.roundupreg.cache import invalidate_cache
 from matholymp.roundupreg.config import have_consent_forms, have_id_scans, \
     get_short_name_year, get_script_scan_props_code
-from matholymp.roundupreg.roundupemail import send_email
 from matholymp.roundupreg.rounduputil import person_is_contestant, \
-    contestant_code
+    contestant_code, create_email_user
 
 
 def country_react(db, cl, nodeid, oldvalues):
@@ -62,38 +58,24 @@ def country_react(db, cl, nodeid, oldvalues):
         if nodeid != flag_country:
             db.flag.set(flag_id, country=nodeid)
     email_addr = db.country.get(nodeid, 'contact_email')
-    if not email_addr:
-        return
-    email_extra = db.country.get(nodeid, 'contact_extra')
-    if email_extra:
-        email_extra = [val.strip()
-                       for val in email_extra.split('\n')]
-        email_extra = [val for val in email_extra if val]
-    else:
-        email_extra = []
-    country_code = db.country.get(nodeid, 'code')
-    username = country_code + '_reg'
-    if db.user.stringFind(username=username):
-        return
-    country_name = db.country.get(nodeid, 'name')
-    realname = country_name + ' registration'
-    if db.user.stringFind(realname=realname):
-        return
-    pw = roundup.password.generatePassword()
-    db.user.create(username=username, realname=realname,
-                   password=roundup.password.Password(pw, config=db.config),
-                   address=email_addr, country=nodeid,
-                   roles='User,Register')
-    template_path = os.path.join(db.config.TRACKER_HOME, 'extensions',
-                                 'email-template-new-user')
-    template_text = read_text_from_file(template_path)
-    email_text = template_text % {'country': country_name,
-                                  'username': username,
-                                  'password': pw}
-    short_name_year = get_short_name_year(db)
-    subject = '%s registration (%s)' % (short_name_year, country_name)
-    send_email(db, [email_addr] + email_extra, subject, email_text,
-               country_code)
+    if email_addr:
+        email_extra = db.country.get(nodeid, 'contact_extra')
+        if email_extra:
+            email_extra = [val.strip()
+                           for val in email_extra.split('\n')]
+            email_extra = [val for val in email_extra if val]
+        else:
+            email_extra = []
+        country_code = db.country.get(nodeid, 'code')
+        username = country_code + '_reg'
+        country_name = db.country.get(nodeid, 'name')
+        realname = country_name + ' registration'
+        short_name_year = get_short_name_year(db)
+        subject = '%s registration (%s)' % (short_name_year, country_name)
+        create_email_user(db, username, realname, [email_addr] + email_extra,
+                          nodeid, None, 'Register', subject,
+                          'email-template-new-user', {'country': country_name},
+                          country_code, False)
 
 
 def person_react(db, cl, nodeid, oldvalues):

@@ -51,12 +51,10 @@ import zipfile
 from roundup.cgi.actions import Action
 from roundup.cgi.exceptions import Unauthorised
 from roundup.exceptions import Reject
-import roundup.password
 
 from matholymp.data import EventGroup
 from matholymp.docgen import read_docgen_config, DocumentGenerator
-from matholymp.fileutil import read_text_from_file, boolean_states, \
-    file_extension, mime_type_map
+from matholymp.fileutil import boolean_states, file_extension, mime_type_map
 from matholymp.images import open_image_no_alpha, scale_image_to_size_jpeg, \
     scale_image_to_width_jpeg, scale_image_to_width_png
 from matholymp.roundupreg.auditors import audit_country_fields, \
@@ -73,7 +71,8 @@ from matholymp.roundupreg.roundupsitegen import RoundupSiteGenerator
 from matholymp.roundupreg.roundupsource import RoundupDataSource
 from matholymp.roundupreg.rounduputil import person_is_contestant, \
     contestant_code, scores_final, valid_country_problem, valid_int_str, \
-    create_rss, country_from_code, person_is_remote, show_scores
+    create_rss, create_email_user, country_from_code, person_is_remote, \
+    show_scores
 from matholymp.roundupreg.userauditor import valid_address
 
 
@@ -1012,31 +1011,16 @@ class PersonBulkRegisterAction(BulkRegisterAction):
         if contact_list:
             # Create the self-registration account.
             username = 'selfreg_%s' % item_id
-            if self.db.user.stringFind(username=username):
-                return
             realname = '%s %s' % (item['given_name'], item['family_name'])
-            pw = roundup.password.generatePassword()
-            self.db.user.create(username=username, realname=realname,
-                                password=roundup.password.Password(
-                                    pw, config=self.db.config),
-                                address=contact_list[0],
-                                country=item['country'], person=item_id,
-                                roles='User,SelfRegister')
-            self.db.commit()
-            template_path = os.path.join(self.db.config.TRACKER_HOME,
-                                         'extensions',
-                                         'email-template-self-reg')
-            template_text = read_text_from_file(template_path)
-            email_text = template_text % {'role': csv_row['Primary Role'],
-                                          'id': item_id,
-                                          'username': username,
-                                          'password': pw}
             short_name_year = get_short_name_year(self.db)
             subject = '%s registration (%s, %s)' % (short_name_year,
                                                     realname,
                                                     csv_row['Primary Role'])
-            send_email(self.db, contact_list, subject, email_text,
-                       'selfreg%s' % item_id)
+            create_email_user(self.db, username, realname, contact_list,
+                              item['country'], item_id, 'SelfRegister',
+                              subject, 'email-template-self-reg',
+                              {'role': csv_row['Primary Role'], 'id': item_id},
+                              'selfreg%s' % item_id, True)
 
 
 def register_actions(instance):

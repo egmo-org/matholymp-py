@@ -33,20 +33,25 @@ registration system.
 """
 
 import html
+import os.path
 import re
 import time
 
+import roundup.password
+
 from matholymp.datetimeutil import date_from_ymd_str, age_on_date
-from matholymp.fileutil import file_format_contents, file_extension
+from matholymp.fileutil import read_text_from_file, file_format_contents, \
+    file_extension
+from matholymp.roundupreg.roundupemail import send_email
 from matholymp.roundupreg.config import get_num_problems, get_score_props, \
     get_age_day_date, event_type
 
 __all__ = ['person_date_of_birth', 'contestant_age', 'person_is_contestant',
            'contestant_code', 'pn_score', 'scores_final', 'any_scores_missing',
            'country_has_contestants', 'valid_country_problem', 'valid_int_str',
-           'create_rss', 'db_file_format_contents', 'db_file_extension',
-           'db_file_url', 'country_from_code', 'person_is_remote',
-           'registration_enabled', 'show_scores']
+           'create_rss', 'create_email_user', 'db_file_format_contents',
+           'db_file_extension', 'db_file_url', 'country_from_code',
+           'person_is_remote', 'registration_enabled', 'show_scores']
 
 
 def person_date_of_birth(db, person):
@@ -163,6 +168,34 @@ def create_rss(db, title, description, **args):
                 '</item>' % (html.escape(title), html.escape(description),
                              html.escape(date_text), html.escape(rss_url)))
     db.rss.set(rss_id, text=rss_text)
+
+
+def create_email_user(db, username, realname, email_to, country, person,
+                      role, subject, template, template_subst, msgid_frag,
+                      do_commit):
+    """Create and send email to a user if not already present."""
+    if db.user.stringFind(username=username):
+        return
+    pw = roundup.password.generatePassword()
+    create_args = {'username': username,
+                   'realname': realname,
+                   'password': roundup.password.Password(pw, config=db.config),
+                   'address': email_to[0],
+                   'country': country,
+                   'roles': 'User,' + role}
+    if person is not None:
+        create_args['person'] = person
+    db.user.create(**create_args)
+    if do_commit:
+        db.commit()
+    template_path = os.path.join(db.config.TRACKER_HOME, 'extensions',
+                                 template)
+    template_text = read_text_from_file(template_path)
+    template_subst = template_subst.copy()
+    template_subst['username'] = username
+    template_subst['password'] = pw
+    email_text = template_text % template_subst
+    send_email(db, email_to, subject, email_text, msgid_frag)
 
 
 def db_file_format_contents(db, cls, file_id):
