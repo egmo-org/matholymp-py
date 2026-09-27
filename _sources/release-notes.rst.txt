@@ -181,6 +181,15 @@ the registration system is not active.
   `matholymp_country_invitation_letter_register` and
   :file:`country.prereg.html` is changed.
 
+* There is some support in the registration system for accounts for
+  Leaders, separate from those used to register participants.  Such an
+  account can view scans of scripts from its country's contestants (as
+  can an account for registering participants) and can also view
+  scores for its country's contestants when scores are otherwise
+  hidden.  :file:`country.item.html`, :file:`person.item.html`,
+  :file:`person.scoreboard.html` and :file:`person.scoredisplay.html`
+  are changed.
+
 Version 2020.07.0 (22 July 2020)
 --------------------------------
 
