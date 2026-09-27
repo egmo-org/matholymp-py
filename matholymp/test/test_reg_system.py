@@ -404,8 +404,8 @@ class RoundupTestSession:
         """Initialise a RoundupTestSession."""
         self.instance = instance
         self.b = mechanicalsoup.StatefulBrowser(raise_on_404=True)
-        self.last_mail_bin = None
-        self.last_mail_dec = None
+        self.last_mail_bin = []
+        self.last_mail_dec = []
         self.num_people = 0
         self.check_open(self.instance.url)
         if username is not None:
@@ -428,7 +428,7 @@ class RoundupTestSession:
             sb_method = getattr(self.b, sb_name)
             old_mail_size = os.stat(self.instance.mail_file).st_size
 
-            def fn(*args, mail=False, error=False, status=None, login=False,
+            def fn(*args, mail=0, error=False, status=None, login=False,
                    html=True, **kwargs):
                 response = sb_method(*args, **kwargs)
                 if status is None:
@@ -443,18 +443,28 @@ class RoundupTestSession:
                 if mail_generated:
                     with open(self.instance.mail_file, 'rb') as f:
                         mail_bin = f.read()[old_mail_size:]
-                        self.last_mail_bin = mail_bin
-                        if b'Content-Transfer-Encoding: base64' in mail_bin:
-                            content_idx = mail_bin.index(b'\n\n') + 2
-                            mail_bin = mail_bin[content_idx:]
-                            self.last_mail_dec = base64.b64decode(mail_bin)
-                        else:
-                            self.last_mail_dec = mail_bin
+                        split_mail_bin = (b'\n' + mail_bin).split(b'\nFrom ')
+                        if split_mail_bin[0] != b'':
+                            raise ValueError('unexpected start to mail')
+                        self.last_mail_bin = [b'From ' + m + b'\n'
+                                              for m in split_mail_bin[1:]]
+                        self.last_mail_dec = []
+                        for m in self.last_mail_bin:
+                            if b'Content-Transfer-Encoding: base64' in m:
+                                content_idx = m.index(b'\n\n') + 2
+                                m = m[content_idx:]
+                                self.last_mail_dec.append(base64.b64decode(m))
+                            else:
+                                self.last_mail_dec.append(m)
                 if mail and not mail_generated:
                     raise ValueError('request failed to generate mail')
                 elif mail_generated and not mail:
                     raise ValueError('request generated mail: %s'
-                                     % str(self.last_mail_bin))
+                                     % str(b''.join(self.last_mail_bin)))
+                elif mail_generated and len(self.last_mail_bin) != mail:
+                    raise ValueError('request generated wrong number of '
+                                     'emails: %s'
+                                     % str(b''.join(self.last_mail_bin)))
                 if hasattr(response, 'soup') and html:
                     soup = response.soup
                     error_p = soup.find('p', class_='error-message')
@@ -708,14 +718,14 @@ class RoundupTestSession:
             else:
                 self.b[key] = value
 
-    def create(self, cls, data, error=False, mail=False):
+    def create(self, cls, data, error=False, mail=0):
         """Create some kind of entity through the corresponding form."""
         self.check_open_relative('%s?@template=item' % cls)
         self.select_main_form()
         self.set(data)
         self.check_submit_selected(error=error, mail=mail)
 
-    def create_defaults(self, cls, data, defaults, error=False, mail=False):
+    def create_defaults(self, cls, data, defaults, error=False, mail=0):
         """Create some kind of entity with default settings for some fields.
 
         Where a default setting is specified, it is used if no
@@ -776,7 +786,7 @@ class RoundupTestSession:
         auto_user = 'contact_email' in data and not error
         self.create('country', data, error=error, mail=auto_user)
         if auto_user:
-            mail_dec = self.last_mail_dec
+            mail_dec = self.last_mail_dec[0]
             username_idx = mail_dec.rindex(b'Username: ')
             mail_dec = mail_dec[username_idx:]
             mail_data = mail_dec.split(b'\n')
@@ -799,7 +809,7 @@ class RoundupTestSession:
         self.create_country('ABC', 'Test First Country')
 
     def create_person(self, country, role, other=None, error=False,
-                      mail=False):
+                      mail=0):
         """Create a person."""
         data = {'country': country, 'primary_role': role}
         if other is not None:
@@ -815,7 +825,7 @@ class RoundupTestSession:
                     'tshirt': 'S'}
         self.create_defaults('person', data, defaults, error=error, mail=mail)
 
-    def edit(self, cls, entity_id, data, error=False, mail=False, status=None):
+    def edit(self, cls, entity_id, data, error=False, mail=0, status=None):
         """Edit some kind of entity through the corresponding form."""
         self.check_open_relative('%s%s' % (cls, entity_id))
         self.select_main_form()
@@ -835,7 +845,7 @@ class RoundupTestSession:
                 self.set({'%s%d' % (country_code, num): score})
         self.check_submit_selected(error=error)
 
-    def edit_prereg(self, entity_id, data, error=False, mail=False):
+    def edit_prereg(self, entity_id, data, error=False, mail=0):
         """Edit preregistration data through the corresponding form."""
         self.check_open_relative('country%s?@template=prereg'
                                  % entity_id)
@@ -1223,7 +1233,7 @@ class RegSystemTestCase(unittest.TestCase):
         # Check where the email was sent.
         self.assertIn(
             b'\nTO: ABC@example.invalid, webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         # Test login with the new user works.
         self.get_session('ABC_reg')
         # Test case of extra contact addresses.
@@ -1237,7 +1247,7 @@ class RegSystemTestCase(unittest.TestCase):
             b'\nTO: DEF@example.invalid, DEF2@example.invalid, '
             b'DEF3@example.invalid, DEF5@example.invalid, '
             b'webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
 
     def test_country_csv(self):
         """
@@ -3894,7 +3904,7 @@ class RegSystemTestCase(unittest.TestCase):
              'future_contact_email_1': 'first@email.invalid',
              'future_contact_email_3': 'some@email.invalid',
              'future_contact_name_3': 'Some Name'},
-            mail=True)
+            mail=1)
         anon_csv = session.get_countries_csv()
         admin_csv = admin_session.get_countries_csv()
         reg_csv = reg_session.get_countries_csv()
@@ -3926,7 +3936,7 @@ class RegSystemTestCase(unittest.TestCase):
              'future_contact_email_1': 'first@em.invalid',
              'future_contact_email_3': 'some@em.invalid',
              'future_contact_name_3': 'Other Name'},
-            mail=True)
+            mail=1)
         anon_csv = session.get_countries_csv()
         admin_csv = admin_session.get_countries_csv()
         reg_csv = reg_session.get_countries_csv()
@@ -4168,17 +4178,17 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session.set({'csv_file': csv_filename})
         admin_session.check_submit_selected()
         admin_session.select_main_form()
-        admin_session.check_submit_selected(mail=True)
+        admin_session.check_submit_selected(mail=1)
         self.assertIn(
             b'\nTO: DEF1@example.invalid, DEF2@example.invalid, '
             b'DEF3@example.invalid, webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         # The non-ASCII name means a Content-Transfer-Encoding must be
         # specified rather than attempting to send the mail as 8-bit
         # (which fails when Roundup is run in an ASCII locale).
         self.assertIn(
             b'\nContent-Transfer-Encoding:',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         anon_csv = session.get_countries_csv()
         admin_csv = admin_session.get_countries_csv_public_only()
         expected_abc = {'XMO Number': '2', 'Country Number': '3',
@@ -4257,7 +4267,7 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session.set({'csv_file': csv_filename})
         admin_session.check_submit_selected()
         admin_session.select_main_form()
-        admin_session.check_submit_selected(mail=True)
+        admin_session.check_submit_selected(mail=1)
         admin_csv = admin_session.get_countries_csv()
         self.assertEqual(admin_csv[4]['Future Contact Organisation'],
                          'Some Org')
@@ -4303,11 +4313,11 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session.set({'csv_file': csv_filename})
         admin_session.check_submit_selected()
         admin_session.select_main_form()
-        admin_session.check_submit_selected(mail=True)
+        admin_session.check_submit_selected(mail=1)
         self.assertIn(
             b'\nTO: DEF1@example.invalid, DEF2@example.invalid, '
             b'DEF3@example.invalid, webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         anon_csv = session.get_countries_csv()
         admin_csv = admin_session.get_countries_csv_public_only()
         expected_abc = {'XMO Number': '2', 'Country Number': '3',
@@ -4361,11 +4371,11 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session.set({'csv_file': csv_filename})
         admin_session.check_submit_selected()
         admin_session.select_main_form()
-        admin_session.check_submit_selected(mail=True)
+        admin_session.check_submit_selected(mail=1)
         self.assertIn(
             b'\nTO: DEF1@example.invalid, DEF2@example.invalid, '
             b'DEF3@example.invalid, webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         anon_csv = session.get_countries_csv()
         admin_csv = admin_session.get_countries_csv_public_only()
         img_url_csv = self.instance.url + 'flag1/flag.png'
@@ -4425,17 +4435,17 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session.set({'csv_file': csv_filename, 'csv_delimiter': ';'})
         admin_session.check_submit_selected()
         admin_session.select_main_form()
-        admin_session.check_submit_selected(mail=True)
+        admin_session.check_submit_selected(mail=1)
         self.assertIn(
             b'\nTO: DEF1@example.invalid, DEF2@example.invalid, '
             b'DEF3@example.invalid, webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         # The non-ASCII name means a Content-Transfer-Encoding must be
         # specified rather than attempting to send the mail as 8-bit
         # (which fails when Roundup is run in an ASCII locale).
         self.assertIn(
             b'\nContent-Transfer-Encoding:',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         anon_csv = session.get_countries_csv()
         admin_csv = admin_session.get_countries_csv_public_only()
         expected_abc = {'XMO Number': '2', 'Country Number': '3',
@@ -4863,39 +4873,39 @@ class RegSystemTestCase(unittest.TestCase):
         # irrelevant details does not.
         admin_session.edit('person', '1',
                            {'given_name': 'Changed Given'},
-                           mail=True)
+                           mail=1)
         self.assertIn(
             b'TO: admin@example.invalid, webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         admin_session.edit('person', '1',
                            {'tshirt': 'M'})
         admin_session.edit('person', '1',
                            {'family_name': 'Changed Family'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'passport_given_name': 'Changed Passport Given'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'passport_family_name': 'Changed Passport Family'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'nationality': 'Other'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'passport_number': '987654321'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'gender': 'Male'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'date_of_birth_year': '1999'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'date_of_birth_month': 'February'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'date_of_birth_day': '2'},
-                           mail=True)
+                           mail=1)
 
     @_with_config(docgen_directory='docgen')
     def test_country_invitation_letter_register(self):
@@ -4947,11 +4957,12 @@ class RegSystemTestCase(unittest.TestCase):
                   encoding='utf-8') as f:
             f.write(r'\notavalidlatexdocument')
         invitation_response = admin_session.check_submit_selected(html=False,
-                                                                  mail=True)
+                                                                  mail=1)
         self.assertEqual(invitation_response.headers['content-type'],
                          'text/plain; charset=UTF-8')
         self.assertIn(b'notavalidlatexdocument', invitation_response.content)
-        self.assertIn(b'notavalidlatexdocument', admin_session.last_mail_dec)
+        self.assertIn(b'notavalidlatexdocument',
+                      admin_session.last_mail_dec[0])
         # Permission error (requires user to have valid form, then
         # have permissions removed, then try submitting it).
         admin_session.create_user('admin2', 'XMO 2015 Staff', 'Admin')
@@ -13820,11 +13831,11 @@ class RegSystemTestCase(unittest.TestCase):
         # The error here is that this test is configured to use a
         # background but none is available.
         badge_response = admin_session.check_submit_selected(html=False,
-                                                             mail=True)
+                                                             mail=1)
         self.assertEqual(badge_response.headers['content-type'],
                          'text/plain; charset=UTF-8')
         self.assertIn(b'lanyard-generic.pdf', badge_response.content)
-        self.assertIn(b'lanyard-generic.pdf', admin_session.last_mail_dec)
+        self.assertIn(b'lanyard-generic.pdf', admin_session.last_mail_dec[0])
         # Permission error (requires user to have valid form, then
         # have permissions removed, then try submitting it).
         admin_session.create_user('admin2', 'XMO 2015 Staff', 'Admin')
@@ -13978,11 +13989,11 @@ class RegSystemTestCase(unittest.TestCase):
         # The error here is that this test is configured to use a
         # background but none is available.
         zip_response = admin_session.check_submit_selected(html=False,
-                                                           mail=True)
+                                                           mail=1)
         self.assertEqual(zip_response.headers['content-type'],
                          'text/plain; charset=UTF-8')
         self.assertIn(b'lanyard-generic.pdf', zip_response.content)
-        self.assertIn(b'lanyard-generic.pdf', admin_session.last_mail_dec)
+        self.assertIn(b'lanyard-generic.pdf', admin_session.last_mail_dec[0])
 
     def test_person_name_badge_zip_none(self):
         """
@@ -14031,39 +14042,39 @@ class RegSystemTestCase(unittest.TestCase):
         # irrelevant details does not.
         admin_session.edit('person', '1',
                            {'given_name': 'Changed Given'},
-                           mail=True)
+                           mail=1)
         self.assertIn(
             b'TO: admin@example.invalid, webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         admin_session.edit('person', '1',
                            {'tshirt': 'M'})
         admin_session.edit('person', '1',
                            {'family_name': 'Changed Family'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'passport_given_name': 'Changed Passport Given'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'passport_family_name': 'Changed Passport Family'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'nationality': 'Other'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'passport_number': '987654321'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'gender': 'Male'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'date_of_birth_year': '1999'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'date_of_birth_month': 'February'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'date_of_birth_day': '2'},
-                           mail=True)
+                           mail=1)
 
     @_with_config(docgen_directory='docgen')
     def test_person_invitation_letter_register(self):
@@ -14105,11 +14116,12 @@ class RegSystemTestCase(unittest.TestCase):
                   encoding='utf-8') as f:
             f.write(r'\notavalidlatexdocument')
         invitation_response = admin_session.check_submit_selected(html=False,
-                                                                  mail=True)
+                                                                  mail=1)
         self.assertEqual(invitation_response.headers['content-type'],
                          'text/plain; charset=UTF-8')
         self.assertIn(b'notavalidlatexdocument', invitation_response.content)
-        self.assertIn(b'notavalidlatexdocument', admin_session.last_mail_dec)
+        self.assertIn(b'notavalidlatexdocument',
+                      admin_session.last_mail_dec[0])
         # Permission error (requires user to have valid form, then
         # have permissions removed, then try submitting it).
         admin_session.create_user('admin2', 'XMO 2015 Staff', 'Admin')
@@ -14220,39 +14232,39 @@ class RegSystemTestCase(unittest.TestCase):
         # irrelevant details does not.
         admin_session.edit('person', '1',
                            {'given_name': 'Changed Given'},
-                           mail=True)
+                           mail=1)
         self.assertIn(
             b'TO: admin@example.invalid, webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         admin_session.edit('person', '2',
                            {'tshirt': 'M'})
         admin_session.edit('person', '1',
                            {'family_name': 'Changed Family'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '2',
                            {'passport_given_name': 'Changed Passport Given'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'passport_family_name': 'Changed Passport Family'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '2',
                            {'nationality': 'Other'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'passport_number': '987654321'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '2',
                            {'gender': 'Male'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'date_of_birth_year': '1999'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '2',
                            {'date_of_birth_month': 'February'},
-                           mail=True)
+                           mail=1)
         admin_session.edit('person', '1',
                            {'date_of_birth_day': '2'},
-                           mail=True)
+                           mail=1)
 
     @_with_config(docgen_directory='docgen', require_passport_number='Yes',
                   require_nationality='Yes', event_type='hybrid')
@@ -14301,15 +14313,15 @@ class RegSystemTestCase(unittest.TestCase):
         # details for a remote participant does not.
         admin_session.edit('person', '1',
                            {'given_name': 'Changed Given'},
-                           mail=True)
+                           mail=1)
         self.assertIn(
             b'TO: admin@example.invalid, webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         admin_session.edit('person', '2',
                            {'given_name': 'Changed Given'})
         admin_session.edit('person', '3',
                            {'given_name': 'Changed Given'},
-                           mail=True)
+                           mail=1)
 
     @_with_config(docgen_directory='docgen')
     def test_person_invitation_letter_zip_errors(self):
@@ -14342,11 +14354,12 @@ class RegSystemTestCase(unittest.TestCase):
                   encoding='utf-8') as f:
             f.write(r'\notavalidlatexdocument')
         zip_response = admin_session.check_submit_selected(html=False,
-                                                           mail=True)
+                                                           mail=1)
         self.assertEqual(zip_response.headers['content-type'],
                          'text/plain; charset=UTF-8')
         self.assertIn(b'notavalidlatexdocument', zip_response.content)
-        self.assertIn(b'notavalidlatexdocument', admin_session.last_mail_dec)
+        self.assertIn(b'notavalidlatexdocument',
+                      admin_session.last_mail_dec[0])
 
     def test_person_invitation_letter_zip_none(self):
         """
@@ -14428,17 +14441,17 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session.set({'csv_file': csv_filename})
         admin_session.check_submit_selected()
         admin_session.select_main_form()
-        admin_session.check_submit_selected(mail=True)
+        admin_session.check_submit_selected(mail=1)
         self.assertIn(
             b'\nTO: DEF1@example.invalid, DEF2@example.invalid, '
             b'webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         # The non-ASCII name means a Content-Transfer-Encoding must be
         # specified rather than attempting to send the mail as 8-bit
         # (which fails when Roundup is run in an ASCII locale).
         self.assertIn(
             b'\nContent-Transfer-Encoding:',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         anon_csv = session.get_people_csv()
         admin_csv = admin_session.get_people_csv()
         reg_csv = reg_session.get_people_csv()
@@ -14812,11 +14825,11 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session.set({'csv_file': csv_filename})
         admin_session.check_submit_selected()
         admin_session.select_main_form()
-        admin_session.check_submit_selected(mail=True)
+        admin_session.check_submit_selected(mail=1)
         self.assertIn(
             b'\nTO: DEF1@example.invalid, DEF2@example.invalid, '
             b'webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         anon_csv = session.get_people_csv()
         admin_csv = admin_session.get_people_csv()
         reg_csv = reg_session.get_people_csv()
@@ -15202,17 +15215,17 @@ class RegSystemTestCase(unittest.TestCase):
         admin_session.set({'csv_file': csv_filename, 'csv_delimiter': ';'})
         admin_session.check_submit_selected()
         admin_session.select_main_form()
-        admin_session.check_submit_selected(mail=True)
+        admin_session.check_submit_selected(mail=1)
         self.assertIn(
             b'\nTO: DEF1@example.invalid, DEF2@example.invalid, '
             b'webmaster@example.invalid\n',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         # The non-ASCII name means a Content-Transfer-Encoding must be
         # specified rather than attempting to send the mail as 8-bit
         # (which fails when Roundup is run in an ASCII locale).
         self.assertIn(
             b'\nContent-Transfer-Encoding:',
-            admin_session.last_mail_bin)
+            admin_session.last_mail_bin[0])
         anon_csv = session.get_people_csv()
         admin_csv = admin_session.get_people_csv()
         reg_csv = reg_session.get_people_csv()
