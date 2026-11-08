@@ -51,7 +51,8 @@ __all__ = ['person_date_of_birth', 'contestant_age', 'person_is_contestant',
            'country_has_contestants', 'valid_country_problem', 'valid_int_str',
            'create_rss', 'create_email_user', 'db_file_format_contents',
            'db_file_extension', 'db_file_url', 'country_from_code',
-           'person_is_remote', 'registration_enabled', 'show_scores']
+           'person_is_remote', 'registration_enabled', 'show_scores',
+           'hide_scans_props']
 
 
 def person_date_of_birth(db, person):
@@ -289,3 +290,11 @@ def show_scores(db, userid, country):
     return (perm
             or not db.event.get('1', 'hide_scores_message')
             or scores_final(db))
+
+
+def hide_scans_props(db):
+    """
+    List person properties for scans that are hidden from leader accounts.
+    """
+    props = db.event.get('1', 'hide_scans_props')
+    return props.split() if props else ()

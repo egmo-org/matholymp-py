@@ -188,7 +188,12 @@ the registration system is not active.
   scores for its country's contestants when scores are otherwise
   hidden.  :file:`country.item.html`, :file:`person.item.html`,
   :file:`person.scoreboard.html` and :file:`person.scoredisplay.html`
-  are changed.
+  are changed.  Scans for particular problems can be hidden from
+  leader accounts (if mark schemes are still under discussion, in
+  particular) by entering the internal property names such as
+  ``script_scan_p1`` or ``scratch_scan_d2`` in "Properties for scans
+  to hide" under :guilabel:`Set medal boundaries or disable
+  registration`; :file:`event.item.html` is changed accordingly.
 
 Version 2020.07.0 (22 July 2020)
 --------------------------------

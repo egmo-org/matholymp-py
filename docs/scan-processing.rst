@@ -73,3 +73,9 @@ interface for such uploads is :download:`watch-upload.py
 that only uploads PDFs from a given directory in which all required
 PDFs exist at startup, without watching for new scans to appear, is
 :download:`upload.py <../examples/scan-processing/upload.py>`.
+
+Scans for particular problems can be hidden from leader accounts (if
+mark schemes are still under discussion, in particular) by entering
+the internal property names such as ``script_scan_p1`` or
+``scratch_scan_d2`` in "Properties for scans to hide" under
+:guilabel:`Set medal boundaries or disable registration`.

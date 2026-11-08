@@ -8900,6 +8900,73 @@ class RegSystemTestCase(unittest.TestCase):
                                'db', 'scans', 'S2', 'ABC1-S2.pdf'), 'rb') as f:
             pdf_linked = f.read()
         self.assertEqual(pdf_linked, sc1_bytes)
+        # Check hiding scans for particular problems.
+        admin_session.edit(
+            'event', '1',
+            {'hide_scans_props': 'script_scan_p1 scratch_scan_d2'})
+        # Now admin but not registering or leader user can access
+        # those scans.
+        admin_bytes = admin_session.get_bytes(sc1_url_csv)
+        reg_session.check_open(
+            sc1_url_csv,
+            error='You are not allowed to view this file',
+            status=403)
+        leader_session.check_open(
+            sc1_url_csv,
+            error='You are not allowed to view this file',
+            status=403)
+        self.assertEqual(admin_bytes, sc1_bytes)
+        admin_bytes = admin_session.get_bytes(sc4_url_csv)
+        reg_session.check_open(
+            sc4_url_csv,
+            error='You are not allowed to view this file',
+            status=403)
+        leader_session.check_open(
+            sc4_url_csv,
+            error='You are not allowed to view this file',
+            status=403)
+        self.assertEqual(admin_bytes, sc4_bytes)
+        # All those users can still access another problem's scans.
+        admin_bytes = admin_session.get_bytes(sc3_url_csv)
+        reg_bytes = reg_session.get_bytes(sc3_url_csv)
+        leader_bytes = leader_session.get_bytes(sc3_url_csv)
+        self.assertEqual(admin_bytes, sc3_bytes)
+        self.assertEqual(reg_bytes, sc3_bytes)
+        self.assertEqual(leader_bytes, sc3_bytes)
+        # Check the script scan linked from the person page for a
+        # non-hidden script.
+        admin_session.check_open_relative('person1')
+        got_bytes = admin_session.get_link_contents(
+            'Script Scan P6')
+        self.assertEqual(got_bytes, sc3_bytes)
+        reg_session.check_open(self.instance.url)
+        reg_session.check_open_relative('person1')
+        got_bytes = admin_session.get_link_contents(
+            'Script Scan P6')
+        self.assertEqual(got_bytes, sc3_bytes)
+        leader_session.check_open(self.instance.url)
+        leader_session.check_open_relative('person1')
+        got_bytes = admin_session.get_link_contents(
+            'Script Scan P6')
+        self.assertEqual(got_bytes, sc3_bytes)
+        # For hidden scripts, only admin users see the link from the
+        # person page.
+        admin_session.check_open_relative('person1')
+        got_bytes = admin_session.get_link_contents(
+            'Script Scan P1')
+        self.assertEqual(got_bytes, sc1_bytes)
+        reg_session.check_open_relative('person1')
+        self.assertIsNone(reg_session.get_link('Script Scan P1'))
+        leader_session.check_open_relative('person1')
+        self.assertIsNone(leader_session.get_link('Script Scan P1'))
+        admin_session.check_open_relative('person1')
+        got_bytes = admin_session.get_link_contents(
+            'Scratch Scan Day 2')
+        self.assertEqual(got_bytes, sc1_bytes)
+        reg_session.check_open_relative('person1')
+        self.assertIsNone(reg_session.get_link('Scratch Scan Day 2'))
+        leader_session.check_open_relative('person1')
+        self.assertIsNone(leader_session.get_link('Scratch Scan Day 2'))
 
     def test_person_script_errors(self):
         """

@@ -60,7 +60,8 @@ from matholymp.roundupreg.config import distinguish_official, \
     get_script_scan_props, get_language_numbers, get_future_contact_numbers, \
     invitation_letter_register, country_invitation_letter_register, \
     is_virtual_event, have_remote_participation, allow_hybrid_countries
-from matholymp.roundupreg.rounduputil import person_is_contestant, show_scores
+from matholymp.roundupreg.rounduputil import person_is_contestant, \
+    show_scores, hide_scans_props
 
 __all__ = ['init_schema']
 
@@ -96,6 +97,7 @@ def init_schema(env):
           silver=String(),
           bronze=String(),
           hide_scores_message=String(),
+          hide_scans_props=String(),
           **event_extra)
 
     country_extra = {}
@@ -369,11 +371,13 @@ def init_schema(env):
         db.security.addPermissionToRole('Register', 'View', cl)
         db.security.addPermissionToRole('SelfRegister', 'View', cl)
 
-    def own_country_person(db, userid, itemid):
+    def own_country_person(db, userid, itemid, **ctx):
         """Determine whether the userid matches the country of the person
-        being accessed."""
-        return (db.user.get(userid, 'country')
-                == db.person.get(itemid, 'country'))
+        being accessed, but exclude access to hidden scan properties."""
+        if db.user.get(userid, 'country') != db.person.get(itemid, 'country'):
+            return False
+        hide = hide_scans_props(db)
+        return ctx['property'] not in hide
 
     def own_person(db, userid, itemid):
         """Determine whether the userid matches the person being accessed."""
@@ -602,9 +606,12 @@ def init_schema(env):
         user_country = db.user.get(userid, 'country')
         found = False
         people = db.person.filter(None, {'country': user_country})
+        hide = hide_scans_props(db)
+        script_scan_props_nohide = [x for x in script_scan_props
+                                    if x not in hide]
         for person in people:
             if person_is_contestant(db, person):
-                for prop in script_scan_props:
+                for prop in script_scan_props_nohide:
                     if db.person.get(person, prop) == itemid:
                         found = True
                         break

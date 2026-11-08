@@ -112,6 +112,11 @@ define="edit_ok context/is_edit_ok"
   <td><input name="hide_scores_message" metal:use-macro="normal_input"></td>
  </tr>
 
+ <tr tal:define="name string:hide_scans_props; label string:Properties for scans to hide; value context/hide_scans_props; edit_ok edit_ok">
+  <th metal:use-macro="th_label">Properties for scans to hide</th>
+  <td><input name="hide_scans_props" metal:use-macro="normal_input"></td>
+ </tr>
+
  <tr tal:condition="edit_ok">
   <td>
    &nbsp;
