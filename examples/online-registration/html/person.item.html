@@ -71,7 +71,9 @@ please inform the people you register of this information.
 </table>
 <table class="form" tal:condition="python:not utils.require_dob(db._db)">
 <tr>
- <td>Date of birth is required for contestants.</td>
+ <td>Date of birth is required for contestants.  <strong>If you are
+ registering a non-contestant aged under 18, please let the hosts
+ know.</strong></td>
 </tr>
 </table>
 <table class="form">
@@ -267,7 +269,10 @@ please inform the people you register of this information.
 
  <tr tal:condition="python:(context.is_edit_ok() and not utils.is_virtual_event(db._db))">
   <td colspan="2">Allergies and dietary requirements should be
-  entered so that appropriate food can be arranged.
+  entered so that appropriate food can be arranged.  For example,
+  &ldquo;vegetarian&rdquo;, &ldquo;vegan&rdquo;, &ldquo;vegetarian on
+  Friday&rdquo;, &ldquo;gluten-free diet&rdquo;, &ldquo;cheese
+  allergy&rdquo;, &ldquo;no alcohol&rdquo;.
  <tal:block tal:condition="python:utils.require_diet(db._db)">
   If none, please enter &lsquo;None&rsquo;.
  </tal:block>
@@ -362,7 +367,8 @@ please inform the people you register of this information.
  <tr>
   <td colspan="2">Please see the regulations or consult the organisers
   regarding availability of single rooms and associated fees and
-  deadlines, and consult the organisers for any special requests.</td>
+  deadlines, and consult the organisers for any special requests.
+  <strong>Single rooms are not available for Contestants.</strong></td>
  </tr>
 </tal:block>
 
@@ -527,7 +533,7 @@ select the appropriate options.  You must select &ldquo;Yes&rdquo; or
  </tr>
  <tr>
   <td colspan="2">1. <strong>This participant has given permission for
-  publishing online of photos that are taken during the event and in
+  publishing online of photos/videos that are taken during the event and in
   which this participant is recognisable.</strong>  (In the case of a
   participant younger than 16, the parents have given
   permission.)</td>
