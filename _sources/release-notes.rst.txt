@@ -195,6 +195,9 @@ the registration system is not active.
   to hide" under :guilabel:`Set medal boundaries or disable
   registration`; :file:`event.item.html` is changed accordingly.
 
+* The example :file:`person.item.html` has some additions to clarify
+  how to complete some fields.
+
 Version 2020.07.0 (22 July 2020)
 --------------------------------
 
